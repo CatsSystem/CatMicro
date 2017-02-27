@@ -1,0 +1,19 @@
+{
+    "name": "cat-sys/cat-micro",
+    "description": "Cat Micro Service Core",
+    "authors": [
+        {
+            "name": "lidanyang",
+            "email": "lancelot2014@foxmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7"
+    },
+
+    "autoload": {
+        "psr-0": {
+            "\\base":"src"
+        }
+    }
+}
