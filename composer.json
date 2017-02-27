@@ -12,8 +12,8 @@
     },
 
     "autoload": {
-        "psr-0": {
-            "\\base":"src"
+        "psr-4": {
+            "base\\":"src/"
         }
     }
 }
