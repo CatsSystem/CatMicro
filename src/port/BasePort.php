@@ -48,6 +48,7 @@ abstract class BasePort
          * Port Define
          */
         $config = $this->handleSetting();
+        $config = array_merge($config, $this->config['protocol'] ?? [] );
         if( !empty($config) )
         {
             $this->port->set($config);

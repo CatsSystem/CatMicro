@@ -8,8 +8,8 @@
 
 require_once "../vendor/autoload.php";
 require_once "../../vendor/autoload.php";
+use app\processor\SwooleService_test3_args;
 use app\processor\TestRequest;
-use app\processor\UniqueService_test3_args;
 
 
 $req = new TestRequest([
@@ -18,7 +18,7 @@ $req = new TestRequest([
         'lists' => [1,2,3]]
 );
 
-$args = new UniqueService_test3_args();
+$args = new SwooleService_test3_args();
 $args->request = $req;
 $args->id = 1;
 
@@ -30,8 +30,9 @@ $message = [
 
 $result = swoole_pack($message);
 
-$client = new swoole_http_client("127.0.0.1", 9504);
+$client = new swoole_http_client("127.0.0.1", 9502);
 $client->post('/' , $result, function(swoole_http_client $cli){
-    var_dump(swoole_unpack($cli->body));
+    var_dump($cli->body);
+    //var_dump(swoole_unpack($cli->body));
 });
 

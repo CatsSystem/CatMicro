@@ -7,7 +7,6 @@
  */
 namespace base\port\adapter;
 
-use base\framework\config\Config;
 use base\port\BasePort;
 use Hprose\Swoole\Http\Service as HttpService;
 use Hprose\Swoole\Socket\Service as SocketService;
@@ -20,7 +19,9 @@ class Hprose extends BasePort
 
     protected function handleSetting()
     {
-        return [];
+        return [
+            'open_eof_check' => false
+        ];
     }
 
 
@@ -29,7 +30,6 @@ class Hprose extends BasePort
         switch (strtolower($this->config['socket_type']))
         {
             case 'tcp':
-            case 'udp':
             {
                 $this->service = new SocketService();
                 $this->service->socketHandle($this->port);
@@ -50,8 +50,9 @@ class Hprose extends BasePort
                 break;
             }
         }
-        $handler_class = Config::getField('project', 'service_path');
+        $handler_class = $this->config['service_path'];
         $handler = new $handler_class();
+        $this->service->errorTypes = E_ALL;
         $this->service->add($handler);
     }
 
@@ -70,6 +71,7 @@ class Hprose extends BasePort
     public function onReceive(\swoole_server $server, $fd, $from_id, $data)
     {
         // TODO: Implement onReceive() method.
+        var_dump($data);
     }
     
 

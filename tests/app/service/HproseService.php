@@ -2,9 +2,9 @@
 
 namespace app\service;
 
+use app\processor\HproseServiceIf;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
-use app\processor\UniqueServiceIf;
 use base\async\http\AsyncHttpClient;
 use base\model\MySQLStatement;
 
@@ -15,7 +15,7 @@ use base\model\MySQLStatement;
  * Time: 15:02
  */
 
-class UniqueService implements UniqueServiceIf
+class HproseService implements HproseServiceIf
 {
     /**
      * @param TestRequest $request
@@ -50,7 +50,7 @@ class UniqueService implements UniqueServiceIf
      */
     public function test2($name, $id)
     {
-        var_dump(func_get_args());
+        var_dump("test");
         return $id;
     }
 
@@ -61,7 +61,7 @@ class UniqueService implements UniqueServiceIf
      */
     public function test3(TestRequest $request, $id)
     {
-        var_dump(func_get_args());
+        var_dump("Hprose Service");
         return $id;
     }
 }

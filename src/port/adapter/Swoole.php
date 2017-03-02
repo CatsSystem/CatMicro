@@ -11,7 +11,6 @@ namespace base\port\adapter;
 use base\common\Error;
 use base\common\Formater;
 use base\concurrent\Promise;
-use base\framework\config\Config;
 use base\framework\log\Log;
 use base\port\BasePort;
 
@@ -22,11 +21,11 @@ class Swoole extends BasePort
         // TCP 开启包长检测
         if(strtolower($this->config['socket_type']) == 'tcp')
         {
-            $this->config["open_length_check"]      = true;
-            $this->config["package_length_type"]    = 'N';
-            $this->config["package_length_offset"]  = 0;
-            $this->config["package_body_offset"]    = 4;
-            return $this->config;
+            $config["open_length_check"]      = true;
+            $config["package_length_type"]    = 'N';
+            $config["package_length_offset"]  = 0;
+            $config["package_body_offset"]    = 4;
+            return $config;
         }
         return [];
     }
@@ -51,7 +50,7 @@ class Swoole extends BasePort
 
             $method     = $data['method'];
 
-            $handler_class = Config::getField('project', 'service_path');
+            $handler_class = $this->config['service_path'];
             $handler = new $handler_class();
             try {
                 $response = yield call_user_func_array([$handler, $method], $data['data']);
