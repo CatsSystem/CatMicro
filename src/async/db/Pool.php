@@ -8,8 +8,7 @@
 
 namespace base\async\db;
 
-
-use base\promise\Promise;
+use base\concurrent\Promise;
 use base\config\Config;
 
 class Pool
@@ -74,7 +73,7 @@ class Pool
         }, function() use ($id) {
             $this->new_connect($id);
         });
-        $driver->connect(false, $promise);
+        $driver->connect($promise);
     }
 
     /**

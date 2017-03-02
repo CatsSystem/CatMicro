@@ -3,44 +3,14 @@
 namespace base;
 
 use base\common\Formater;
+use base\server\MainServer;
 use base\socket\SwooleServer;
 use base\config\Config;
 
 class Enterance
 {
-    private static $classPath = array();
     public static $rootPath;
     public static $configPath;
-
-    final public static function autoLoader($class)
-    {
-        if(isset(self::$classPath[$class])) {
-            require self::$classPath[$class];
-            return;
-        }
-        $baseClasspath = \str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-        $libs = array(
-            self::$rootPath . DIRECTORY_SEPARATOR . 'app',
-            self::$rootPath,
-        );
-        foreach ($libs as $lib) {
-            $classpath = $lib . DIRECTORY_SEPARATOR . $baseClasspath;
-            if (\is_file($classpath)) {
-                self::$classPath[$class] = $classpath;
-                require "{$classpath}";
-                return;
-            }
-        }
-    }
-
-    final public static function exceptionHandler($exception)
-    {
-        var_dump($exception);
-        if( $exception instanceof \Error) {
-            return $exception;
-        }
-        return var_export(Formater::exception($exception), true);
-    }
 
     final public static function fatalHandler()
     {
@@ -55,25 +25,46 @@ class Enterance
         return json_encode(Formater::fatal($error));
     }
 
+    public static function checkLib()
+    {
+        if(!\extension_loaded('swoole')) {
+            throw new \Exception("no swoole extension. get: https://github.com/swoole/swoole-src");
+        }
+
+        if(!\extension_loaded('swoole_serialize')) {
+            throw new \Exception("no swoole_serialize extension. get: https://github.com/swoole/swoole_serialize");
+        }
+
+        if( Config::get('open_hprose', false) && !\extension_loaded('hprose')) {
+            throw new \Exception("no open_hprose extension. get: https://github.com/hprose/hprose-pecl");
+        }
+
+        if( Config::get('open_thrift', false) && !\extension_loaded('thrift_protocol')) {
+            throw new \Exception("no open_thrift extension. get: https://github.com/apache/thrift");
+        }
+    }
+
     public static function run($runPath, $configPath)
     {
         self::$rootPath = $runPath;
         self::$configPath = $runPath . '/config/' . $configPath;
 
-        \spl_autoload_register(__CLASS__ . '::autoLoader');
-
         Config::load(self::$configPath);
 
-        //\set_exception_handler( __CLASS__ . '::exceptionHandler' );
+        self::checkLib();
+
         \register_shutdown_function( __CLASS__ . '::fatalHandler' );
 
         $timeZone = Config::get('time_zone', 'Asia/Shanghai');
         \date_default_timezone_set($timeZone);
 
-        $service = SwooleServer::getInstance()->init(Config::get('socket'));
-        
-        $callback = Config::get('callback');
-        $service->setCallback( new $callback() );
+        $service = MainServer::getInstance()->init(Config::get('server'));
+        $callback = Config::getField('project', 'main_callback');
+        if( !class_exists($callback) )
+        {
+            throw new \Exception("No class {$callback}");
+        }
+        $service->setCallback(new $callback());
         $service->run();
     }
 }

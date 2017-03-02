@@ -13,7 +13,6 @@ class Formater
         $exceptionHash = array(
             'className' => 'fatal',
             'message' => $error['message'],
-            'code' => $error['code'],
             'file' => $error['file'],
             'line' =>$error['line'],
             'userAgent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',

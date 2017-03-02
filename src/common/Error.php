@@ -10,7 +10,9 @@ namespace base\common;
 class Error
 {
     const SUCCESS = 0;
-    
+
+    const ERR_INVALID_DATA                           = -1;
+    const ERR_EXCEPTION                              = -2;
     const ERR_NO_DATA                                = -4;
 
     const ERR_MYSQL_TIMEOUT                          = -10;

@@ -11,7 +11,7 @@ namespace base\async\db\adapter;
 use base\async\db\Driver;
 use base\async\db\Pool;
 use base\common\Error;
-use base\promise\Promise;
+use base\concurrent\Promise;
 use base\config\Config;
 
 class SwooleMySQL extends Driver
@@ -27,12 +27,8 @@ class SwooleMySQL extends Driver
         $this->id = $id;
     }
 
-    public function connect($reconnect = false, Promise $promise = null, $timeout = 3000)
+    public function connect(Promise $promise, $timeout = 3000)
     {
-        if($reconnect)
-        {
-            $this->close();
-        }
         $this->db = new \swoole_mysql();
         $this->db->on('Close', function($db){
             $this->is_close = true;

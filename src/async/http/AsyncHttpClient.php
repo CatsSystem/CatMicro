@@ -9,7 +9,7 @@
 namespace base\async\http;
 
 use base\common\Error;
-use base\promise\Promise;
+use base\concurrent\Promise;
 
 /**
  * 异步Http客户端封装
@@ -53,29 +53,30 @@ class AsyncHttpClient
     }
 
     /**
-     * @param Promise $promise 用于承载异步请求的结果
      * @return bool 若无需DNS查询,返回true;否则返回false
      */
-    public function init(Promise $promise = null)
+    public function init()
     {
+        $promise = new Promise();
+
         // 利用ip2long方法检测传入的是否为IP
         if( !ip2long($this->domain) ) {   // 传入的是域名
             swoole_async_dns_lookup($this->domain, function ($host, $ip) use ($promise){
                 $this->domain = $ip;
                 $this->http_client = new \swoole_http_client($this->domain, $this->port, $this->is_ssl);
-                if( $promise ) {
-                    $promise->resolve(Error::SUCCESS);
-                }
+                $promise->resolve(Error::SUCCESS);
             });
-            return false;
+            return $promise;
         } else {
             $this->http_client = new \swoole_http_client($this->domain, $this->port, $this->is_ssl);
-            return true;
+            $promise->resolve(Error::SUCCESS);
+            return $promise;
         }
     }
 
-    public function get($path, Promise $promise,  $timeout = 3000)
+    public function get($path, $timeout = 3000)
     {
+        $promise = new Promise();
         $timeId = swoole_timer_after($timeout, function() use ($promise){
             $this->http_client->close();
             $promise->resolve([
@@ -91,6 +92,7 @@ class AsyncHttpClient
                 'status'    => $cli->statusCode
             ]);
         });
+        return $promise;
     }
 
     public function post($path, $data, Promise $promise, $timeout = 3000)

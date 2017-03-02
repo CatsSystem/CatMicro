@@ -9,7 +9,7 @@
 namespace base\async\db;
 
 
-use base\promise\Promise;
+use base\concurrent\Promise;
 
 abstract class Driver
 {
@@ -29,7 +29,7 @@ abstract class Driver
         return new $class_name($id);
     }
 
-    abstract public function connect($reconnect = false, Promise $promise = null);
+    abstract public function connect(Promise $promise, $timeout = 3000);
 
     abstract public function close();
 

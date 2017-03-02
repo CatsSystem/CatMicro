@@ -36,10 +36,10 @@ class File extends Logger
         {
             return;
         }
-        $log_file = $this->file_path . $path . '_' .  date("Y-m-d");
+        $log_file = $this->file_path . $path . '_' .  date("Y-m-d") . '.log';
         if( !isset($this->file[$path]) )
         {
-            $last = $this->file_path . $path . '_' .date("Y-m-d",strtotime("-1 day"));
+            $last = $this->file_path . $path . '_' .date("Y-m-d",strtotime("-1 day")) . '.log';
             if(isset($this->file[$last]))
             {
                 fclose($this->file[$last]);

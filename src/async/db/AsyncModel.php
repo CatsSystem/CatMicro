@@ -8,7 +8,7 @@
 
 namespace base\async\db;
 
-use base\promise\Promise;
+use base\concurrent\Promise;
 
 class AsyncModel
 {
@@ -19,13 +19,15 @@ class AsyncModel
         $this->table = $table;
     }
 
-    public function query($sql, Promise $promise, $timeout = 3000)
+    public function query($sql, $timeout = 3000)
     {
+        $promise = new Promise();
         $driver = Pool::getInstance()->get($sql, $promise, $timeout);
         if(empty($driver))
         {
-            return;
+            return $promise;
         }
         $driver->async_query($sql, $promise, $timeout);
+        return $promise;
     }
 }

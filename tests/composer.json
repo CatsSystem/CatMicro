@@ -1,0 +1,14 @@
+{
+    "require": {
+        "php": ">=7",
+        "hprose/hprose-swoole": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "app\\":"app/"
+        },
+        "classmap": [
+            "app/processor"
+        ]
+    }
+}
