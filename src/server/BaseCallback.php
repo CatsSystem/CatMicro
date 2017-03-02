@@ -135,33 +135,38 @@ abstract class BaseCallback
         return;
     }
 
+    public function onConnect(\swoole_server $server, $fd, $from_id)
+    {
+        var_dump($fd);
+    }
+
     public function _before_start()
     {
-        $port_list = Config::get('port');
-        foreach ($port_list as $name => $port_config)
+        $service_list = Config::get('service');
+        foreach ($service_list as $service)
         {
-            $switch = 'open_' . $name;
+            $switch = 'open_' . $service['port_type'];
 
             if( !Config::get($switch, false) ) {
                 continue;
             }
-            $port = PortFactory::getInstance($name);
-            $port->init($this->server, $port_config);
+            $port = PortFactory::getInstance($service['port_type']);
+            $port->init($this->server, $service);
             $port->run();
         }
 
-        $process = new \swoole_process(function(\swoole_process $worker) {
-            $worker->name(Config::get('project_name') . " cache process");
-            CacheLoader::getInstance()->init();
-            AsyncRedis::getInstance()->connect();
-            Pool::getInstance()->init(function(){
-                CacheLoader::getInstance()->load(true);
-                swoole_timer_tick(Constants::ONE_TICK, function(){
-                    CacheLoader::getInstance()->load();
-                });
-            });
-        }, false, false);
-        $this->server->addProcess($process);
+//        $process = new \swoole_process(function(\swoole_process $worker) {
+//            $worker->name(Config::get('project_name') . " cache process");
+//            CacheLoader::getInstance()->init();
+//            AsyncRedis::getInstance()->connect();
+//            Pool::getInstance()->init(function(){
+//                CacheLoader::getInstance()->load(true);
+//                swoole_timer_tick(Constants::ONE_TICK, function(){
+//                    CacheLoader::getInstance()->load();
+//                });
+//            });
+//        }, false, false);
+//        $this->server->addProcess($process);
 
         $this->before_start();
     }

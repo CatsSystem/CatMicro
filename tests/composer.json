@@ -1,7 +1,6 @@
 {
     "require": {
-        "php": ">=7",
-        "hprose/hprose-swoole": "dev-master"
+        "php": ">=7"
     },
     "autoload": {
         "psr-4": {

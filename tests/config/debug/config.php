@@ -11,8 +11,6 @@ return array(
         'pid_path'          => __DIR__ . '/../../',
         'project_name'      => 'micro_service',
 
-        'processor_path'    => 'app\\processor\\UniqueService',
-        'service_path'      => 'app\\service\\UniqueService',
         'main_callback'     => 'app\\callback\\ServerCallback',
     ),
 
@@ -36,22 +34,4 @@ return array(
         'host' => '0.0.0.0',
         'port' => 9501,
     ),
-
-    'port' => [
-        'hprose' => [
-            'socket_type' => 'tcp',
-            'host' => '0.0.0.0',
-            'port' => 9502,
-        ],
-        'thrift' => [
-            'socket_type' => 'tcp',
-            'host' => '0.0.0.0',
-            'port' => 9503,
-        ],
-        'swoole' => [
-            'socket_type' => 'http',
-            'host' => '0.0.0.0',
-            'port' => 9504,
-        ]
-    ]
 );

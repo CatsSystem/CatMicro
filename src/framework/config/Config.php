@@ -12,7 +12,6 @@ use base\Enterance;
 
 class Config
 {
-
     private static $config;
     private static $configPath;
 
@@ -23,16 +22,13 @@ class Config
         }
         $files = Config::tree($configPath, "/.php$/");
         $config = array();
-
         if (!empty($files)) {
             foreach ($files as $file) {
-                $config += include "Config.php";
+                $config += include "{$file}";
             }
         }
-
         self::$config = $config;
         self::$configPath = $configPath;
-
         return $config;
     }
 
@@ -40,7 +36,7 @@ class Config
     {
         $config = array();
         foreach ($files as $file) {
-            $config += include "Config.php";
+            $config += include "{$file}";
         }
         self::$config = $config;
         return $config;
@@ -89,7 +85,6 @@ class Config
             if ($filename[0] === '.') {
                 continue;
             }
-
             if ($file->isDir()) {
                 self::tree($dir . DIRECTORY_SEPARATOR . $filename, $filter, $result, $deep);
             } else {

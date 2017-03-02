@@ -16,7 +16,7 @@ use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
 
-interface UniqueServiceIf {
+interface SwooleServiceIf {
   /**
    * @param \app\processor\TestRequest $request
    * @return \app\processor\TestResponse
@@ -37,7 +37,7 @@ interface UniqueServiceIf {
 }
 
 
-class UniqueServiceClient implements \app\processor\UniqueServiceIf {
+class SwooleServiceClient implements \app\processor\SwooleServiceIf {
   protected $input_ = null;
   protected $output_ = null;
 
@@ -56,7 +56,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
 
   public function send_test1(\app\processor\TestRequest $request)
   {
-    $args = new \app\processor\UniqueService_test1_args();
+    $args = new \app\processor\SwooleService_test1_args();
     $args->request = $request;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
@@ -75,7 +75,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
   public function recv_test1()
   {
     $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
-    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\UniqueService_test1_result', $this->input_->isStrictRead());
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\SwooleService_test1_result', $this->input_->isStrictRead());
     else
     {
       $rseqid = 0;
@@ -89,7 +89,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
         $this->input_->readMessageEnd();
         throw $x;
       }
-      $result = new \app\processor\UniqueService_test1_result();
+      $result = new \app\processor\SwooleService_test1_result();
       $result->read($this->input_);
       $this->input_->readMessageEnd();
     }
@@ -107,7 +107,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
 
   public function send_test2($name, $id)
   {
-    $args = new \app\processor\UniqueService_test2_args();
+    $args = new \app\processor\SwooleService_test2_args();
     $args->name = $name;
     $args->id = $id;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
@@ -127,7 +127,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
   public function recv_test2()
   {
     $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
-    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\UniqueService_test2_result', $this->input_->isStrictRead());
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\SwooleService_test2_result', $this->input_->isStrictRead());
     else
     {
       $rseqid = 0;
@@ -141,7 +141,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
         $this->input_->readMessageEnd();
         throw $x;
       }
-      $result = new \app\processor\UniqueService_test2_result();
+      $result = new \app\processor\SwooleService_test2_result();
       $result->read($this->input_);
       $this->input_->readMessageEnd();
     }
@@ -159,7 +159,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
 
   public function send_test3(\app\processor\TestRequest $request, $id)
   {
-    $args = new \app\processor\UniqueService_test3_args();
+    $args = new \app\processor\SwooleService_test3_args();
     $args->request = $request;
     $args->id = $id;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
@@ -179,7 +179,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
   public function recv_test3()
   {
     $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
-    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\UniqueService_test3_result', $this->input_->isStrictRead());
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\app\processor\SwooleService_test3_result', $this->input_->isStrictRead());
     else
     {
       $rseqid = 0;
@@ -193,7 +193,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
         $this->input_->readMessageEnd();
         throw $x;
       }
-      $result = new \app\processor\UniqueService_test3_result();
+      $result = new \app\processor\SwooleService_test3_result();
       $result->read($this->input_);
       $this->input_->readMessageEnd();
     }
@@ -208,7 +208,7 @@ class UniqueServiceClient implements \app\processor\UniqueServiceIf {
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class UniqueService_test1_args {
+class SwooleService_test1_args {
   static $_TSPEC;
 
   /**
@@ -234,7 +234,7 @@ class UniqueService_test1_args {
   }
 
   public function getName() {
-    return 'UniqueService_test1_args';
+    return 'SwooleService_test1_args';
   }
 
   public function read($input)
@@ -272,7 +272,7 @@ class UniqueService_test1_args {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test1_args');
+    $xfer += $output->writeStructBegin('SwooleService_test1_args');
     if ($this->request !== null) {
       if (!is_object($this->request)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
@@ -288,7 +288,7 @@ class UniqueService_test1_args {
 
 }
 
-class UniqueService_test1_result {
+class SwooleService_test1_result {
   static $_TSPEC;
 
   /**
@@ -314,7 +314,7 @@ class UniqueService_test1_result {
   }
 
   public function getName() {
-    return 'UniqueService_test1_result';
+    return 'SwooleService_test1_result';
   }
 
   public function read($input)
@@ -352,7 +352,7 @@ class UniqueService_test1_result {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test1_result');
+    $xfer += $output->writeStructBegin('SwooleService_test1_result');
     if ($this->success !== null) {
       if (!is_object($this->success)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
@@ -368,7 +368,7 @@ class UniqueService_test1_result {
 
 }
 
-class UniqueService_test2_args {
+class SwooleService_test2_args {
   static $_TSPEC;
 
   /**
@@ -404,7 +404,7 @@ class UniqueService_test2_args {
   }
 
   public function getName() {
-    return 'UniqueService_test2_args';
+    return 'SwooleService_test2_args';
   }
 
   public function read($input)
@@ -448,7 +448,7 @@ class UniqueService_test2_args {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test2_args');
+    $xfer += $output->writeStructBegin('SwooleService_test2_args');
     if ($this->name !== null) {
       $xfer += $output->writeFieldBegin('name', TType::STRING, 1);
       $xfer += $output->writeString($this->name);
@@ -466,7 +466,7 @@ class UniqueService_test2_args {
 
 }
 
-class UniqueService_test2_result {
+class SwooleService_test2_result {
   static $_TSPEC;
 
   /**
@@ -491,7 +491,7 @@ class UniqueService_test2_result {
   }
 
   public function getName() {
-    return 'UniqueService_test2_result';
+    return 'SwooleService_test2_result';
   }
 
   public function read($input)
@@ -528,7 +528,7 @@ class UniqueService_test2_result {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test2_result');
+    $xfer += $output->writeStructBegin('SwooleService_test2_result');
     if ($this->success !== null) {
       $xfer += $output->writeFieldBegin('success', TType::I32, 0);
       $xfer += $output->writeI32($this->success);
@@ -541,7 +541,7 @@ class UniqueService_test2_result {
 
 }
 
-class UniqueService_test3_args {
+class SwooleService_test3_args {
   static $_TSPEC;
 
   /**
@@ -578,7 +578,7 @@ class UniqueService_test3_args {
   }
 
   public function getName() {
-    return 'UniqueService_test3_args';
+    return 'SwooleService_test3_args';
   }
 
   public function read($input)
@@ -623,7 +623,7 @@ class UniqueService_test3_args {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test3_args');
+    $xfer += $output->writeStructBegin('SwooleService_test3_args');
     if ($this->request !== null) {
       if (!is_object($this->request)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
@@ -644,7 +644,7 @@ class UniqueService_test3_args {
 
 }
 
-class UniqueService_test3_result {
+class SwooleService_test3_result {
   static $_TSPEC;
 
   /**
@@ -669,7 +669,7 @@ class UniqueService_test3_result {
   }
 
   public function getName() {
-    return 'UniqueService_test3_result';
+    return 'SwooleService_test3_result';
   }
 
   public function read($input)
@@ -706,7 +706,7 @@ class UniqueService_test3_result {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('UniqueService_test3_result');
+    $xfer += $output->writeStructBegin('SwooleService_test3_result');
     if ($this->success !== null) {
       $xfer += $output->writeFieldBegin('success', TType::I32, 0);
       $xfer += $output->writeI32($this->success);
@@ -719,7 +719,7 @@ class UniqueService_test3_result {
 
 }
 
-class UniqueServiceProcessor {
+class SwooleServiceProcessor {
   protected $handler_ = null;
   public function __construct($handler) {
     $this->handler_ = $handler;
@@ -747,10 +747,10 @@ class UniqueServiceProcessor {
   }
 
   protected function process_test1($seqid, $input, $output) {
-    $args = new \app\processor\UniqueService_test1_args();
+    $args = new \app\processor\SwooleService_test1_args();
     $args->read($input);
     $input->readMessageEnd();
-    $result = new \app\processor\UniqueService_test1_result();
+    $result = new \app\processor\SwooleService_test1_result();
     $result->success = $this->handler_->test1($args->request);
     $bin_accel = ($output instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
@@ -766,10 +766,10 @@ class UniqueServiceProcessor {
     }
   }
   protected function process_test2($seqid, $input, $output) {
-    $args = new \app\processor\UniqueService_test2_args();
+    $args = new \app\processor\SwooleService_test2_args();
     $args->read($input);
     $input->readMessageEnd();
-    $result = new \app\processor\UniqueService_test2_result();
+    $result = new \app\processor\SwooleService_test2_result();
     $result->success = $this->handler_->test2($args->name, $args->id);
     $bin_accel = ($output instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
@@ -785,10 +785,10 @@ class UniqueServiceProcessor {
     }
   }
   protected function process_test3($seqid, $input, $output) {
-    $args = new \app\processor\UniqueService_test3_args();
+    $args = new \app\processor\SwooleService_test3_args();
     $args->read($input);
     $input->readMessageEnd();
-    $result = new \app\processor\UniqueService_test3_result();
+    $result = new \app\processor\SwooleService_test3_result();
     $result->success = $this->handler_->test3($args->request, $args->id);
     $bin_accel = ($output instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)

@@ -10,7 +10,6 @@ namespace base\port\adapter;
 
 use base\common\Formater;
 use base\concurrent\Promise;
-use base\framework\config\Config;
 use base\framework\log\Log;
 use base\port\BasePort;
 use base\protocol\Protocol;
@@ -29,11 +28,11 @@ class Thrift extends BasePort
         // TCP 开启包长检测
         if(strtolower($this->config['socket_type']) == 'tcp')
         {
-            $this->config["open_length_check"]      = true;
-            $this->config["package_length_type"]    = 'N';
-            $this->config["package_length_offset"]  = 0;
-            $this->config["package_body_offset"]    = 4;
-            return $this->config;
+            $config["open_length_check"]      = true;
+            $config["package_length_type"]    = 'N';
+            $config["package_length_offset"]  = 0;
+            $config["package_body_offset"]    = 4;
+            return $config;
         }
         return [];
     }
@@ -53,8 +52,8 @@ class Thrift extends BasePort
             $protocol = new TBinaryProtocol($socket, false, false);
 
             try {
-                $processor_path = Config::getField('project', 'processor_path');
-                $handler_class = Config::getField('project', 'service_path');
+                $processor_path = $this->config['processor_path'];
+                $handler_class = $this->config['service_path'];
                 $handler = new $handler_class();
 
                 $rseqid = 0;

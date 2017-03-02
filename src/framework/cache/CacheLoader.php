@@ -34,11 +34,16 @@ class CacheLoader
     /**
      * @var array(ILoader)
      */
-    private $loaders;
+    private $loaders = [];
 
     public function init()
     {
-        $files = new \DirectoryIterator(Enterance::$rootPath . '/app/cache');
+        $cache_file_path = Enterance::$rootPath . '/app/cache';
+        if( !file_exists($cache_file_path) )
+        {
+            return;
+        }
+        $files = new \DirectoryIterator($cache_file_path);
         foreach ($files as $file) {
             $filename = $file->getFilename();
             if ($filename[0] === '.') {

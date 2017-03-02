@@ -9,11 +9,17 @@
 require_once '../vendor/autoload.php';
 require_once '../../vendor/autoload.php';
 
+use app\processor\TestRequest;
+
 $client = new \Hprose\Socket\Client('tcp://127.0.0.1:9502', false);
-
-$ids = [6238180604807987001, 6238180604807987122];
-$message = new \app\processor\addVideoRequest(array('userId' => strval(10000), 'bucket' => 'KgUniqueFeed','videoIds' => $ids));
-
-$response = $client->addVideo($message);
+var_dump("test");
+$req = new TestRequest([
+        'id' => 1,
+        'name' => "test",
+        'lists' => [1,2,3]
+    ]
+);
+var_dump($req);
+$response = $client->test3($req, 1);
 
 var_dump($response);
