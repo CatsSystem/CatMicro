@@ -6,7 +6,7 @@
  * Time: 下午5:40
  */
 
-namespace base\config;
+namespace base\framework\config;
 
 use base\Enterance;
 
@@ -26,7 +26,7 @@ class Config
 
         if (!empty($files)) {
             foreach ($files as $file) {
-                $config += include "{$file}";
+                $config += include "Config.php";
             }
         }
 
@@ -40,7 +40,7 @@ class Config
     {
         $config = array();
         foreach ($files as $file) {
-            $config += include "{$file}";
+            $config += include "Config.php";
         }
         self::$config = $config;
         return $config;

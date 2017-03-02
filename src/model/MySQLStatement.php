@@ -10,7 +10,7 @@
 namespace base\model;
 
 use base\async\db\AsyncModel;
-use base\promise\Promise;
+use base\concurrent\Promise;
 use base\sync\db\BaseDB;
 
 class MySQLStatement extends DbQuery

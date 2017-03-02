@@ -9,7 +9,7 @@ namespace base\framework\cache;
 
 use base\common\Error;
 use base\Enterance;
-use base\promise\Promise;
+use base\concurrent\Promise;
 
 class CacheLoader
 {

@@ -6,9 +6,9 @@
  * Time: 上午10:07
  */
 
-namespace base\log;
+namespace base\framework\log;
 
-use base\config\Config;
+use base\framework\config\Config;
 
 class Log
 {

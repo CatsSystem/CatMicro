@@ -6,7 +6,7 @@
  * Time: 上午10:06
  */
 
-namespace base\log;
+namespace base\framework\log;
 
 abstract class Logger
 {

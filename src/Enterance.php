@@ -4,8 +4,7 @@ namespace base;
 
 use base\common\Formater;
 use base\server\MainServer;
-use base\socket\SwooleServer;
-use base\config\Config;
+use base\framework\config\Config;
 
 class Enterance
 {

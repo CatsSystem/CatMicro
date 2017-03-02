@@ -10,8 +10,8 @@ namespace base\port\adapter;
 
 use base\common\Formater;
 use base\concurrent\Promise;
-use base\config\Config;
-use base\log\Log;
+use base\framework\config\Config;
+use base\framework\log\Log;
 use base\port\BasePort;
 use base\protocol\Protocol;
 use Thrift\Exception\TApplicationException;

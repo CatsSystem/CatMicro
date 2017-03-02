@@ -7,7 +7,7 @@
  */
 namespace base\port\adapter;
 
-use base\config\Config;
+use base\framework\config\Config;
 use base\port\BasePort;
 use Hprose\Swoole\Http\Service as HttpService;
 use Hprose\Swoole\Socket\Service as SocketService;

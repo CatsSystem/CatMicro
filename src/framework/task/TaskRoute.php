@@ -8,7 +8,7 @@
 namespace base\framework\task;
 
 use base\common\Factory;
-use base\config\Config;
+use base\framework\config\Config;
 
 class TaskRoute
 {
