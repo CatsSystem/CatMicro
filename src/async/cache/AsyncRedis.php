@@ -8,8 +8,8 @@
 
 namespace base\async\cache;
 
+use base\concurrent\Promise;
 use base\config\Config;
-use base\promise\Promise;
 use base\common\Error;
 
 class AsyncRedis
@@ -48,12 +48,13 @@ class AsyncRedis
         //TODO Cluster
     }
 
-    public function connect(Promise $promise, $timeout = 3000)
+    public function connect($timeout = 3000)
     {
+        $promise = new Promise();
         $this->redis = new \swoole_redis();
 
         $this->redis->on("close", function(){
-            $this->connect(new Promise());
+            $this->connect();
         });
         $timeId = swoole_timer_after($timeout, function() use ($promise){
             $this->close();
@@ -96,6 +97,7 @@ class AsyncRedis
                     return;
                 }
         });
+        return $promise;
     }
 
     public function close()
@@ -105,16 +107,12 @@ class AsyncRedis
 
     public function __call($name, $arguments)
     {
+        $promise = new Promise();
         if( $name == 'subscribe' || $name == 'unsubscribe'
             || $name == 'psubscribe' || $name == 'punsubscribe' ) {
 
         } else {
-            $index = count($arguments) - 1;
-            $promise = $arguments[$index];
-            if( ! $promise instanceof Promise )
-            {
-                return false;
-            }
+            $index = count($arguments);
             $timeId = swoole_timer_after($this->timeout, function() use ($promise){
                 $this->close();
                 $promise->resolve([
@@ -138,7 +136,8 @@ class AsyncRedis
                 ]);
             };
         }
-        return call_user_func_array([$this->redis, $name], $arguments);
+        call_user_func_array([$this->redis, $name], $arguments);
+        return $promise;
     }
 
     /**

@@ -359,21 +359,22 @@ class MySQLStatement extends DbQuery
 
 	/**
 	 * 执行SQL语句
-	 * @param Promise $promise
 	 * @throws \Exception
 	 */
-	public function query(Promise $promise)
+	public function query()
 	{
 		$this->_is_executed = true;
 		$model = new AsyncModel("");
-		$model->query([$this->sql(), false], $promise);
+		$result = yield $model->query([$this->sql(), false]);
+		return $result;
 	}
 
-	public function getOne(Promise $promise)
+	public function getOne()
 	{
 		$this->_is_executed = true;
 		$model = new AsyncModel("");
-		$model->query([$this->sql(), true], $promise);
+		$result = yield $model->query([$this->sql(), true]);
+		return $result;
 	}
 
 	public function sync_query() {
