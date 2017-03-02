@@ -8,7 +8,7 @@
 
 namespace base\sync\cache;
 
-use base\config\Config;
+use base\framework\config\Config;
 
 class Redis
 {

@@ -8,7 +8,6 @@
 
 namespace base\port;
 
-use base\concurrent\Promise;
 use base\protocol\Protocol;
 use base\protocol\ProtocolFactory;
 

@@ -8,7 +8,7 @@
 
 namespace base\sync\db;
 
-use base\config\Config;
+use base\framework\config\Config;
 
 class BaseDB
 {

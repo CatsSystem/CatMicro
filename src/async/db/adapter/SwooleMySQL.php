@@ -12,7 +12,7 @@ use base\async\db\Driver;
 use base\async\db\Pool;
 use base\common\Error;
 use base\concurrent\Promise;
-use base\config\Config;
+use base\framework\config\Config;
 
 class SwooleMySQL extends Driver
 {

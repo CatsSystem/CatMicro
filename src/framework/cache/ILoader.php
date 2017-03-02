@@ -7,8 +7,8 @@
  */
 namespace base\framework\cache;
 
-use base\promise\Promise;
-use base\socket\SwooleServer;
+use base\common\Globals;
+use base\concurrent\Promise;
 
 abstract class ILoader
 {
@@ -22,10 +22,10 @@ abstract class ILoader
 
     public function broadcast($data)
     {
-        $worker_num = SwooleServer::getInstance()->getServer()->setting['worker_num'] - 1;
+        $worker_num = Globals::$server->setting['worker_num'] - 1;
         while( $worker_num >= 0 )
         {
-            SwooleServer::getInstance()->getServer()->sendMessage(json_encode([
+            Globals::$server->sendMessage(json_encode([
                 'type'  => 'cache',
                 'id'    => $this->id,
                 'data'  => $data

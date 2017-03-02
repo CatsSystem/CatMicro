@@ -9,7 +9,7 @@
 namespace base\async\db;
 
 use base\concurrent\Promise;
-use base\config\Config;
+use base\framework\config\Config;
 
 class Pool
 {

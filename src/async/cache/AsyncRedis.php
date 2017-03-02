@@ -9,7 +9,7 @@
 namespace base\async\cache;
 
 use base\concurrent\Promise;
-use base\config\Config;
+use base\framework\config\Config;
 use base\common\Error;
 
 class AsyncRedis

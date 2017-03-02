@@ -8,8 +8,11 @@
 
 namespace base\server;
 
+use base\async\cache\AsyncRedis;
+use base\async\db\Pool;
+use base\common\Constants;
 use base\common\Globals;
-use base\config\Config;
+use base\framework\config\Config;
 use base\framework\cache\CacheLoader;
 use base\framework\task\Task;
 use base\framework\task\TaskRoute;
@@ -146,6 +149,20 @@ abstract class BaseCallback
             $port->init($this->server, $port_config);
             $port->run();
         }
+
+        $process = new \swoole_process(function(\swoole_process $worker) {
+            $worker->name(Config::get('project_name') . " cache process");
+            CacheLoader::getInstance()->init();
+            AsyncRedis::getInstance()->connect();
+            Pool::getInstance()->init(function(){
+                CacheLoader::getInstance()->load(true);
+                swoole_timer_tick(Constants::ONE_TICK, function(){
+                    CacheLoader::getInstance()->load();
+                });
+            });
+        }, false, false);
+        $this->server->addProcess($process);
+
         $this->before_start();
     }
 
