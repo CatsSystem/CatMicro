@@ -8,7 +8,7 @@
 
 require_once "../vendor/autoload.php";
 require_once "../../vendor/autoload.php";
-use app\processor\SwooleService_test3_args;
+use app\processor\SwooleService_test1_args;
 use app\processor\TestRequest;
 
 
@@ -18,21 +18,19 @@ $req = new TestRequest([
         'lists' => [1,2,3]]
 );
 
-$args = new SwooleService_test3_args();
+$args = new SwooleService_test1_args();
 $args->request = $req;
-$args->id = 1;
 
 $vars =
 $message = [
-    'method' => 'test3',
+    'method' => 'test1',
     'data' => get_object_vars($args)
 ];
 
 $result = swoole_pack($message);
 
-$client = new swoole_http_client("127.0.0.1", 9502);
+$client = new swoole_http_client("127.0.0.1", 9504);
 $client->post('/' , $result, function(swoole_http_client $cli){
-    var_dump($cli->body);
-    //var_dump(swoole_unpack($cli->body));
+    var_dump(swoole_unpack($cli->body));
 });
 

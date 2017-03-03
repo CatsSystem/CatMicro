@@ -6,17 +6,17 @@
  * Time: 下午6:53
  */
 
-namespace base\async\http;
+namespace base\framework\client;
 
 use base\common\Error;
 use base\concurrent\Promise;
 
 /**
  * 异步Http客户端封装
- * Class AsyncHttpClient
- * @package base\async\http
+ * Class Http
+ * @package base\framework\client
  */
-class AsyncHttpClient
+class Http
 {
     /**
      * @var \swoole_http_client
@@ -41,6 +41,22 @@ class AsyncHttpClient
      */
     private $port;
 
+    /**
+     * @var int 错误码
+     */
+    public $errno;
+
+    /**
+     * @var string 错误信息
+     */
+    public $error;
+    
+    /**
+     * Http constructor.
+     * @param string    $domain     域名(不带http前缀)或者IP
+     * @param bool      $is_ssl     是否开启SSL (https)
+     * @param int       $port       端口号,默认80, https默认为443
+     */
     public function __construct($domain, $is_ssl = false, $port = 80)
     {
         $this->domain = $domain;
@@ -53,7 +69,9 @@ class AsyncHttpClient
     }
 
     /**
-     * @return bool 若无需DNS查询,返回true;否则返回false
+     * 初始化http客户端
+     * @return Promise
+     * @throws \Exception
      */
     public function init()
     {
@@ -74,6 +92,11 @@ class AsyncHttpClient
         }
     }
 
+    /**
+     * @param string    $path
+     * @param int       $timeout
+     * @return Promise
+     */
     public function get($path, $timeout = 3000)
     {
         $promise = new Promise();
@@ -95,13 +118,42 @@ class AsyncHttpClient
         return $promise;
     }
 
-    public function post($path, $data, Promise $promise, $timeout = 3000)
+    /**
+     * @param string    $path
+     * @param string    $data
+     * @param int       $timeout
+     * @return Promise
+     */
+    public function post($path, $data, $timeout = 3000)
     {
-        
+        $promise = new Promise();
+        $timeId = swoole_timer_after($timeout, function() use ($promise){
+            $this->http_client->close();
+            $promise->resolve([
+                'code'  => Error::ERR_HTTP_TIMEOUT
+            ]);
+        });
+
+        $this->http_client->post($path, $data, function($cli) use($promise,$timeId){
+            \swoole_timer_clear($timeId);
+            $this->http_client->close();
+            $promise->resolve([
+                'code'      => Error::SUCCESS,
+                'data'      => $cli->body,
+                'status'    => $cli->statusCode
+            ]);
+        });
+        return $promise;
     }
 
-    public function execute($path, Promise $promise, $timeout = 3000)
+    /**
+     * @param string    $path
+     * @param int       $timeout
+     * @return Promise
+     */
+    public function execute($path, $timeout = 3000)
     {
+        $promise = new Promise();
         $timeId = swoole_timer_after($timeout, function() use ($promise){
             $this->http_client->close();
             $promise->resolve([
@@ -116,6 +168,7 @@ class AsyncHttpClient
                 'status'    => $cli->statusCode
             ]);
         });
+        return $promise;
     }
 
     public function cookie()

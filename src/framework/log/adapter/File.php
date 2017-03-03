@@ -14,14 +14,11 @@ use base\framework\log\Logger;
 class File extends Logger
 {
     private $file_path;
-    private $config;
     private $file = [];
 
     public function __construct($config)
     {
         parent::__construct($config);
-
-        $this->config = $config;
         $this->file_path = isset($config['path']) ? $config['path'] : '/var/log/swoole/';
 
         if( !file_exists($this->file_path) )
@@ -48,11 +45,11 @@ class File extends Logger
             }
             $this->file[$path] = fopen($log_file,'a');
         }
-        if( is_array($content) )
+        if( is_string($content) )
         {
-            $str = date('Y-m-d H:i:s') .": " . var_export($content, true);
-        } else {
             $str = date("Y-m-d H:i:s") .": " . $content;
+        } else {
+            $str = date('Y-m-d H:i:s') .": " . var_export($content, true);
         }
         fwrite( $this->file[$path], $str . "\r\n");
     }

@@ -84,7 +84,7 @@ class BaseDB
         $dbPwd  = $this->config['password'];
         $dbName = $this->config['database'];
 
-        $dsn = "mysql:host={$dbHost};port=3306;dbname={$dbName}";
+        $dsn = "adapter:host={$dbHost};port=3306;dbname={$dbName}";
         return new \PDO($dsn, $dbUser, $dbPwd, array(
             \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8;",
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,

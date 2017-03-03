@@ -6,6 +6,8 @@ use app\processor\HproseServiceIf;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
 use base\async\http\AsyncHttpClient;
+use base\concurrent\Promise;
+use base\framework\log\Log;
 use base\model\MySQLStatement;
 
 /**
@@ -25,17 +27,22 @@ class HproseService implements HproseServiceIf
     {
         $response = new TestResponse();
         try{
-            var_dump($request);
+            Log::DEBUG("Test", $request);
             $http = new AsyncHttpClient("www.baidu.com");
-            $result = yield $http->init();
-            var_dump($result);
-            $result = yield $http->get('/');
-            var_dump($result);
+            yield $http->init();
 
-            $result = yield MySQLStatement::prepare()
+            $http_result = $http->get('/');
+            $sql_result = MySQLStatement::prepare()
                 ->select("Test",  "*")
+                ->limit(0,5)
                 ->query();
-            var_dump($result);
+
+            $result = yield Promise::all([
+                'http'  => $http_result,
+                'sql'   => $sql_result
+            ]);
+
+            Log::DEBUG("Test", $result);
             $response->status = 200;
         } catch (\Error $e) {
             $response->status = 503;

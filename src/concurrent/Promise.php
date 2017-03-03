@@ -257,6 +257,40 @@ class Promise
         );
     }
 
+    public static function any($array) {
+        return self::toPromise($array)->then(
+            function($array) {
+                $keys = array_keys($array);
+                $n = count($array);
+                if ($n === 0) {
+                    throw new \Exception('any(): $array must not be empty');
+                }
+                $reasons = array();
+                $future = new Promise();
+                $resolve = array($future, "resolve");
+                $reject = function() use ($future, &$reasons, $keys) {
+                    $array = array();
+                    foreach($keys as $key) {
+                        $array[$key] = $reasons[$key];
+                    }
+                    $future->reject($array);
+                };
+                foreach ($array as $index => $element) {
+                    self::toPromise($element)->then(
+                        $resolve,
+                        function($reason) use ($index, &$reasons, &$n, $reject) {
+                            $reasons[$index] = $reason;
+                            if (--$n === 0) {
+                                $reject();
+                            }
+                        }
+                    );
+                }
+                return $future;
+            }
+        );
+    }
+
     public static function wrap($handler) {
         if (is_callable($handler)) {
             if (is_array($handler)) {

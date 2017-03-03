@@ -10,15 +10,14 @@
     "require": {
         "php": ">=7",
         "hprose/hprose-swoole": "dev-master",
-        "kuaigeng/thrift-php":"dev-master"
+        "cat-system/thrift-php": "dev-master"
     },
-
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@120.26.65.109:lidanyang/thrift-php.git"
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.org"
         }
-    ],
+    },
     "autoload": {
         "psr-4": {
             "base\\":"src/"

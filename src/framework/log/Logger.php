@@ -10,9 +10,14 @@ namespace base\framework\log;
 
 abstract class Logger
 {
+    protected $config;
+
+    private $level = 1;
+
     public function __construct($config)
     {
         $this->level = $config['log_level'];
+        $this->config = $config;
     }
 
     public function debug($tag, $content)

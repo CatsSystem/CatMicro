@@ -7,34 +7,69 @@
  */
 
 return [
-    /*********************** Redis Server Config ****************************/
-    'redis' => array(
-        'host'      => '127.0.0.1',
-        'port'      => 6379,
-        'select'    => 0,
-        'pwd'       => 'ky1024'
-    ),
-    /*********************** Redis Server Config end ************************/
-
     /*********************** Log Config ****************************/
     'log'=>array(
         'open_log' => true,
-        'adapter' => 'File',
-        'log_level' => 0,
-        'path' => __DIR__ . "/../../log/",
+        'adapter' => 'Debug',
+        'log_level' => 1,
     ),
     /*********************** Log Config end ************************/
 
-    /*********************** MySQL Config ****************************/
-    'mysql_pool_count' => 5,
+    /*********************** Pool Config Start ***********************/
 
-    'swoole_mysql' => array(
-        'host' => '127.0.0.1',
-        'user' => 'root',
-        'password' => '123456',
-        'database' => 'Test',
-    ),
-    /*********************** MySQL Config end ************************/
-    
-    
+    'pool'  => [
+        [
+            'type'  => 'mysql',
+            'name'  => 'mysql_master',
+            'size'  => 5,
+
+            'args'  => [
+                'host'      => '127.0.0.1',
+                'port'      => 3306,
+                'user'      => 'root',
+                'password'  => '123456',
+                'database'  => 'Test'
+            ]
+        ],
+
+        [
+            'type'  => 'mysql',
+            'name'  => 'mysql_slave',
+            'size'  => 5,
+
+            'args'  => [
+                'host'      => '127.0.0.1',
+                'port'      => 3306,
+                'user'      => 'root',
+                'password'  => '123456',
+                'database'  => 'Test'
+            ]
+        ],
+
+        [
+            'type'  => 'redis',
+            'name'  => 'redis_master',
+            'size'  => 5,
+
+            'args'  => [
+                'host'      => '127.0.0.1',
+                'port'      => 6379,
+                'select'    => 0,
+                'pwd'       => '123456'
+            ]
+        ],
+        [
+            'type'  => 'redis',
+            'name'  => 'redis_slave',
+            'size'  => 5,
+
+            'args'  => [
+                'host'      => '127.0.0.1',
+                'port'      => 6379,
+                'select'    => 0,
+                'pwd'       => '123456'
+            ]
+        ],
+    ]
+    /*********************** Pool Config end *************************/
 ];

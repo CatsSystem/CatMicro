@@ -6,6 +6,7 @@ use app\processor\SwooleServiceIf;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
 use base\async\http\AsyncHttpClient;
+use base\framework\log\Log;
 use base\model\MySQLStatement;
 
 /**
@@ -25,17 +26,18 @@ class SwooleService implements SwooleServiceIf
     {
         $response = new TestResponse();
         try{
-            var_dump($request);
+            Log::DEBUG("Test", $request);
             $http = new AsyncHttpClient("www.baidu.com");
             $result = yield $http->init();
-            var_dump($result);
+            Log::DEBUG("Test", $result);
             $result = yield $http->get('/');
-            var_dump($result);
+            Log::DEBUG("Test", $result);
 
             $result = yield MySQLStatement::prepare()
                 ->select("Test",  "*")
+                ->limit(0,5)
                 ->query();
-            var_dump($result);
+            Log::DEBUG("Test", $result);
             $response->status = 200;
         } catch (\Error $e) {
             $response->status = 503;

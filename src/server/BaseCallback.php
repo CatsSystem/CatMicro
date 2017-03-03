@@ -159,7 +159,7 @@ abstract class BaseCallback
 //            $worker->name(Config::get('project_name') . " cache process");
 //            CacheLoader::getInstance()->init();
 //            AsyncRedis::getInstance()->connect();
-//            Pool::getInstance()->init(function(){
+//            pool::getInstance()->init(function(){
 //                CacheLoader::getInstance()->load(true);
 //                swoole_timer_tick(Constants::ONE_TICK, function(){
 //                    CacheLoader::getInstance()->load();

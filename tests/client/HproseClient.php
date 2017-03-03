@@ -20,6 +20,6 @@ $req = new TestRequest([
     ]
 );
 var_dump($req);
-$response = $client->test3($req, 1);
+$response = $client->test1($req);
 
 var_dump($response);
