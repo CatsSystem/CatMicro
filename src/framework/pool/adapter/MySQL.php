@@ -8,6 +8,7 @@
 
 namespace base\framework\pool\adapter;
 
+use base\common\Globals;
 use base\concurrent\Promise;
 use base\framework\pool\BasePool;
 use base\framework\client\MySQL as Driver;
@@ -15,6 +16,11 @@ use base\framework\client\MySQL as Driver;
 class Mysql extends BasePool
 {
     private $config;
+
+    /**
+     * @var Driver
+     */
+    private $sync;
 
     public function __construct($config)
     {
@@ -26,10 +32,15 @@ class Mysql extends BasePool
 
     public function init()
     {
-        for($i = 0; $i < $this->size; $i ++)
+        if(Globals::isWorker())
         {
-            $this->new_item($i + 1);
+            for($i = 0; $i < $this->size; $i ++)
+            {
+                $this->new_item($i + 1);
+            }
         }
+        $this->sync = new Driver($this->config['args']);
+        $this->sync->connect(0);
     }
 
     /**
@@ -38,13 +49,20 @@ class Mysql extends BasePool
      */
     public function pop()
     {
-        if( $this->idle_queue->isEmpty() )
+        if(Globals::isWorker())
         {
-            $promise = new Promise();
-            $this->waiting_tasks->enqueue($promise);
-            return $promise;
+            if( $this->idle_queue->isEmpty() )
+            {
+                $promise = new Promise();
+                $this->waiting_tasks->enqueue($promise);
+                return $promise;
+            }
+            return $this->idle_queue->dequeue();
         }
-        return $this->idle_queue->dequeue();
+        else
+        {
+            return $this->sync;
+        }
     }
 
     /**

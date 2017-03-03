@@ -18,9 +18,16 @@ class Globals
     {
         if( empty(Globals::$server) )
         {
-            return false;
+            return true;
         }
         return !Globals::$server->taskworker;
     }
 
+    public static function setProcessName($name)
+    {
+        if(PHP_OS != 'Darwin')
+        {
+            swoole_set_process_name($name);
+        }
+    }
 }

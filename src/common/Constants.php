@@ -16,4 +16,7 @@ class Constants
     const ONE_DAY                           = 86400;
     const ONE_MONTH                         = 2592000;
 
+    const MODE_ASYNC                        = 1;
+    const MODE_SYNC                         = 2;
+
 }

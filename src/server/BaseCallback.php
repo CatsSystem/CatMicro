@@ -8,8 +8,6 @@
 
 namespace base\server;
 
-use base\async\cache\AsyncRedis;
-use base\async\db\Pool;
 use base\common\Constants;
 use base\common\Globals;
 use base\framework\config\Config;
@@ -37,8 +35,7 @@ abstract class BaseCallback
 
     public function onStart($server)
     {
-
-        swoole_set_process_name($this->project_name . " server running master:" . $server->master_pid);
+        Globals::setProcessName($this->project_name . " server running master:" . $server->master_pid);
         if (!empty($this->pid_path)) {
             file_put_contents($this->pid_path . DIRECTORY_SEPARATOR . $this->project_name . '_master.pid', $server->master_pid);
         }
@@ -68,7 +65,7 @@ abstract class BaseCallback
      */
     public function onManagerStart($server)
     {
-        swoole_set_process_name($this->project_name .' server manager:' . $server->manager_pid);
+        Globals::setProcessName($this->project_name .' server manager:' . $server->manager_pid);
         if (!empty($this->pid_path)) {
             file_put_contents($this->pid_path . DIRECTORY_SEPARATOR . $this->project_name . '_manager.pid', $server->manager_pid);
         }
@@ -84,20 +81,18 @@ abstract class BaseCallback
         }
     }
 
-    public function onWorkerStart($server, $workerId)
+    public function doWorkerStart($server, $workerId)
     {
         $workNum = Config::getField('server', 'worker_num');
+        var_dump($workNum);
         if ($workerId >= $workNum) {
-            swoole_set_process_name($this->project_name . " server tasker  num: ".($server->worker_id - $workNum)." pid " . $server->worker_pid);
+            Globals::setProcessName($this->project_name . " server tasker  num: ".($server->worker_id - $workNum)." pid " . $server->worker_pid);
         } else {
-            swoole_set_process_name($this->project_name . " server worker  num: {$server->worker_id} pid " . $server->worker_pid);
+            Globals::setProcessName($this->project_name . " server worker  num: {$server->worker_id} pid " . $server->worker_pid);
         }
         Globals::$server = $server;
-    }
 
-    public function onWorkerStop($server, $workerId)
-    {
-        
+        $this->onWorkerStart($server, $workerId);
     }
 
     public function setServer(\swoole_server $server)
@@ -122,7 +117,7 @@ abstract class BaseCallback
 
     public function onFinish(\swoole_server $serv, $task_id, $data)
     {
-
+        // DO NOTHING
     }
 
     public function onPipeMessage(\swoole_server $server, $from_worker_id, $message)
@@ -133,11 +128,6 @@ abstract class BaseCallback
             CacheLoader::getInstance()->set($data['id'], $data['data']);
         }
         return;
-    }
-
-    public function onConnect(\swoole_server $server, $fd, $from_id)
-    {
-        var_dump($fd);
     }
 
     public function _before_start()
@@ -155,20 +145,29 @@ abstract class BaseCallback
             $port->run();
         }
 
-//        $process = new \swoole_process(function(\swoole_process $worker) {
-//            $worker->name(Config::get('project_name') . " cache process");
-//            CacheLoader::getInstance()->init();
-//            AsyncRedis::getInstance()->connect();
-//            pool::getInstance()->init(function(){
-//                CacheLoader::getInstance()->load(true);
-//                swoole_timer_tick(Constants::ONE_TICK, function(){
-//                    CacheLoader::getInstance()->load();
-//                });
-//            });
-//        }, false, false);
-//        $this->server->addProcess($process);
-
         $this->before_start();
+    }
+
+    /**
+     * 打开内存Cache进程
+     * @param $init_callback callable 回调函数, 执行进程的初始化代码
+     */
+    protected function open_cache_process($init_callback)
+    {
+        $process = new \swoole_process(function(\swoole_process $worker) use ($init_callback) {
+           // $worker->name(Config::get('project_name') . " cache process");
+            Globals::setProcessName(Config::get('project_name') . " cache process");
+            CacheLoader::getInstance()->init();
+            if( is_callable($init_callback) )
+            {
+                call_user_func($init_callback);
+            }
+            CacheLoader::getInstance()->load(true);
+            swoole_timer_tick(Constants::ONE_TICK, function(){
+                CacheLoader::getInstance()->load();
+            });
+        }, false, false);
+        $this->server->addProcess($process);
     }
 
     /**
@@ -184,11 +183,23 @@ abstract class BaseCallback
      */
     abstract public function onRequest(\swoole_http_request $request, \swoole_http_response $response);
 
+
+    /**
+     * WebSocket Receive
+     * @param \swoole_websocket_server $server
+     * @param $workerId
+     */
+    abstract public function onWorkerStart($server, $workerId);
+
+
     /**
      * WebSocket Receive
      * @param \swoole_websocket_server $server
      * @param \swoole_websocket_frame $frame
      */
-    abstract public function onMessage(\swoole_websocket_server $server, \swoole_websocket_frame $frame);
+    public function onMessage(\swoole_websocket_server $server, \swoole_websocket_frame $frame)
+    {
+        // DO NOTHING
+    }
 
 }

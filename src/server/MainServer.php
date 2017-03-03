@@ -66,7 +66,6 @@ class MainServer
             'onConnect',
             'onClose',
 
-            'onWorkerStart',
             'onWorkerStop',
             'onWorkerError',
 
@@ -86,6 +85,7 @@ class MainServer
         $this->_server->on('Shutdown', array($this->_callback, 'onShutdown'));
         $this->_server->on('Request', array($this->_callback, 'onRequest'));
         $this->_server->on('Message', array($this->_callback, 'onMessage'));
+        $this->_server->on('WorkerStart', array($this->_callback, 'doWorkerStart'));
 
         foreach($handlerArray as $handler) {
             if(method_exists($this->_callback, $handler)) {

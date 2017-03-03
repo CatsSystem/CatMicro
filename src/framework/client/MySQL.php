@@ -8,6 +8,7 @@
 
 namespace base\framework\client;
 
+use base\common\Constants;
 use base\common\Error;
 use base\concurrent\Promise;
 use base\framework\log\Log;
@@ -33,9 +34,20 @@ class MySQL
      */
     private $pool;
 
-    public function __construct($config)
+    /**
+     * @var int
+     */
+    private $mode;
+
+    /**
+     * @var \mysqli
+     */
+    private $link;
+
+    public function __construct($config, $mode = Constants::MODE_ASYNC)
     {
         $this->config = $config;
+        $this->mode = $mode;
     }
 
     public function addPool($pool)
@@ -48,31 +60,67 @@ class MySQL
         $this->id = $id;
         $promise = new Promise();
 
-        $this->db = new \swoole_mysql();
-        $this->db->on('Close', function($db){
-            $this->close();
-        });
-        $timeId = swoole_timer_after($timeout, function() use ($promise){
-            $this->close();
-            $promise->reject(Error::ERR_MYSQL_TIMEOUT);
-        });
-        $this->db->connect($this->config, function($db, $r) use ($promise,$timeId) {
-            swoole_timer_clear($timeId);
-            if ($r === false) {
-                Log::ERROR('MySQL' , sprintf("Connect MySQL Failed [%d]: %s", $db->connect_errno, $db->connect_error));
-                $promise->reject(Error::ERR_MYSQL_CONNECT_FAILED);
-                return;
+        switch ($this->mode)
+        {
+            case Constants::MODE_ASYNC:
+            {
+                $this->db = new \swoole_mysql();
+                $this->db->on('Close', function($db){
+                    $this->close();
+                });
+                $timeId = swoole_timer_after($timeout, function() use ($promise){
+                    $this->close();
+                    $promise->reject(Error::ERR_MYSQL_TIMEOUT);
+                });
+                $this->db->connect($this->config, function($db, $r) use ($promise,$timeId) {
+                    swoole_timer_clear($timeId);
+                    if ($r === false) {
+                        Log::ERROR('MySQL' , sprintf("Connect MySQL Failed [%d]: %s", $db->connect_errno, $db->connect_error));
+                        $promise->reject(Error::ERR_MYSQL_CONNECT_FAILED);
+                        return;
+                    }
+                    $promise->resolve(Error::SUCCESS);
+                });
+                break;
             }
-            $promise->resolve(Error::SUCCESS);
-        });
+            case Constants::MODE_SYNC:
+            {
+                $dbHost = $this->config['host'];
+                $dbUser = $this->config['user'];
+                $dbPwd  = $this->config['password'];
+                $dbName = $this->config['database'];
+
+                $this->link = new \mysqli($dbHost, $dbUser, $dbPwd, $dbName);
+
+                if ($this->link->connect_error) {
+                    Log::ERROR('MySQL' , sprintf("Connect MySQL Failed [%d]: %s", $this->link->connect_errno, $this->link->connect_error));
+                    $promise->reject(Error::ERR_MYSQL_CONNECT_FAILED);
+                }
+                $promise->resolve(Error::SUCCESS);
+                break;
+            }
+        }
+
         return $promise;
     }
 
     public function close()
     {
-        $this->db->close();
-        unset($this->db);
-        $this->inPool(true);
+        switch ($this->mode)
+        {
+            case Constants::MODE_ASYNC:
+            {
+                $this->db->close();
+                unset($this->db);
+                $this->inPool(true);
+                break;
+            }
+            case Constants::MODE_SYNC:
+            {
+                $this->link->close();
+                break;
+            }
+        }
     }
 
     private function inPool($close = false)
@@ -83,39 +131,75 @@ class MySQL
         }
     }
 
-    public function execute($sql, $timeout)
+    public function execute($sql, $get_one, $timeout=3000)
     {
         $promise = new Promise();
-
-        $timeId = swoole_timer_after($timeout, function() use ($promise, $sql){
-            $this->inPool();
-            $promise->resolve([
-                'code' => Error::ERR_MYSQL_TIMEOUT,
-            ]);
-        });
-        $this->db->query($sql, function($db, $result) use ($sql, $promise, $timeId){
-            $this->inPool();
-            swoole_timer_clear($timeId);
-            if($result === false) {
-                Log::ERROR('MySQL', sprintf("%s \n [%d] %s",$sql, $db->errno, $db->error));
-                $promise->resolve([
-                    'code'  => Error::ERR_MYSQL_QUERY_FAILED,
-                    'errno' => $db->errno,
-                    'msg'   => sprintf("%s \n [%d] %s",$sql, $db->errno, $db->error)
-                ]);
-            } else if($result === true) {
-                $promise->resolve([
-                    'code'          => Error::SUCCESS,
-                    'affected_rows' => $db->affected_rows,
-                    'insert_id'     => $db->insert_id
-                ]);
-            } else {
-                $promise->resolve([
-                    'code'  => Error::SUCCESS,
-                    'data'  => empty($result) ? [] : $result
-                ]);
+        switch ($this->mode)
+        {
+            case Constants::MODE_ASYNC:
+            {
+                $timeId = swoole_timer_after($timeout, function() use ($promise, $sql){
+                    $this->inPool();
+                    $promise->resolve([
+                        'code' => Error::ERR_MYSQL_TIMEOUT,
+                    ]);
+                });
+                $this->db->query($sql, function($db, $result) use ($sql, $promise, $timeId, $get_one){
+                    $this->inPool();
+                    swoole_timer_clear($timeId);
+                    if($result === false) {
+                        Log::ERROR('MySQL', sprintf("%s \n [%d] %s",$sql, $db->errno, $db->error));
+                        $promise->resolve([
+                            'code'  => Error::ERR_MYSQL_QUERY_FAILED,
+                            'errno' => $db->errno
+                        ]);
+                    } else if($result === true) {
+                        $promise->resolve([
+                            'code'          => Error::SUCCESS,
+                            'affected_rows' => $db->affected_rows,
+                            'insert_id'     => $db->insert_id
+                        ]);
+                    } else {
+                        $promise->resolve([
+                            'code'  => Error::SUCCESS,
+                            'data'  => empty($result) ? [] : ($get_one ? $result[0] :$result)
+                        ]);
+                    }
+                });
+                break;
             }
-        });
+            case Constants::MODE_SYNC:
+            {
+                $result = $this->link->query($sql);
+                if($this->link->errno == 2006)
+                {
+                    $this->close();
+                    $this->connect($this->id);
+                    $result = $this->link->query($sql);
+                }
+                if($result === false) {
+                    Log::ERROR('MySQL', sprintf("%s \n [%d] %s",$sql, $this->link->errno, $this->link->error));
+                    $promise->resolve([
+                        'code'  => Error::ERR_MYSQL_QUERY_FAILED,
+                        'errno' => $this->link->errno
+                    ]);
+                } else if($result === true) {
+                    $promise->resolve([
+                        'code'          => Error::SUCCESS,
+                        'affected_rows' => $this->link->affected_rows,
+                        'insert_id'     => $this->link->insert_id
+                    ]);
+                } else {
+                    $result_arr = $result->fetch_assoc();
+                    $promise->resolve([
+                        'code'  => Error::SUCCESS,
+                        'data'  => empty($result_arr) ? [] : ($get_one ? $result_arr[0] : $result_arr)
+                    ]);
+                }
+                break;
+            }
+        }
+
         return $promise;
     }
 }

@@ -8,6 +8,7 @@
 
 namespace base\framework\pool\adapter;
 
+use base\common\Globals;
 use base\concurrent\Promise;
 use base\framework\pool\BasePool;
 use base\framework\client\Redis as Driver;
@@ -16,20 +17,30 @@ class Redis extends BasePool
 {
     private $config;
 
+    /**
+     * @var Driver
+     */
+    private $sync;
+
     public function __construct($config)
     {
         $this->config = $config;
         $this->config['name'] = $this->config['name'] ?? __FILE__;
-        $this->config['size'] = $this->config['size'] ?? 5;
+        $this->config['size'] = 1;
         parent::__construct($config['name'], $this->config['size']);
     }
 
     public function init()
     {
-        for($i = 0; $i < $this->size; $i ++)
+        if(Globals::isWorker())
         {
-            $this->new_item($i + 1);
+            for($i = 0; $i < $this->size; $i ++)
+            {
+                $this->new_item($i + 1);
+            }
         }
+        $this->sync = new Driver($this->config['args']);
+        $this->sync->connect(0);
     }
 
     /**
@@ -38,13 +49,22 @@ class Redis extends BasePool
      */
     public function pop()
     {
-        if( $this->idle_queue->isEmpty() )
+        if(Globals::isWorker())
         {
-            $promise = new Promise();
-            $this->waiting_tasks->enqueue($promise);
-            return $promise;
+            if( $this->idle_queue->isEmpty() )
+            {
+                $promise = new Promise();
+                $this->waiting_tasks->enqueue($promise);
+                return $promise;
+            }
+            $driver = $this->idle_queue->dequeue();
+            $this->idle_queue->enqueue($driver);
+            return $driver;
         }
-        return $this->idle_queue->dequeue();
+        else
+        {
+            return $this->sync;
+        }
     }
 
     /**

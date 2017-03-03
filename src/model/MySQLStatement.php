@@ -11,6 +11,7 @@ namespace base\model;
 
 use base\async\db\AsyncModel;
 use base\concurrent\Promise;
+use base\framework\client\MySQL;
 use base\sync\db\BaseDB;
 
 class MySQLStatement extends DbQuery
@@ -359,56 +360,39 @@ class MySQLStatement extends DbQuery
 
 	/**
 	 * 执行SQL语句
-	 * @throws \Exception
+	 * @param $driver MySQL | Promise
+	 * @return mixed
 	 */
-	public function query()
+	public function query($driver)
 	{
 		$this->_is_executed = true;
-		$model = new AsyncModel("");
-		$result = yield $model->query([$this->sql(), false]);
-		return $result;
+		if( $driver instanceof MySQL ) {
+			$result = $driver->execute($this->sql(), false);
+			return $result;
+		} else {
+			return $driver->then(function(MySQL $driver) {
+				$result = $driver->execute($this->sql(), false);
+				return $result;
+			});
+		}
 	}
 
-	public function getOne()
+	/**
+	 * 执行SQL语句
+	 * @param $driver MySQL | Promise
+	 * @return mixed
+	 */
+	public function getOne($driver)
 	{
-		$this->_is_executed = true;
-		$model = new AsyncModel("");
-		$result = yield $model->query([$this->sql(), true]);
-		return $result;
-	}
-
-	public function sync_query() {
-		$this->_is_executed = true;
-		$statement = BaseDB::getInstance()->query($this->sql());
-		if( empty($statement) ) {
-			return null;
+		if( $driver instanceof MySQL ) {
+			$result = $driver->execute($this->sql(), true);
+			return $result;
+		} else {
+			return $driver->then(function(MySQL $driver) {
+				$result = $driver->execute($this->sql(), true);
+				return $result;
+			});
 		}
-		return $statement->fetchAll(\PDO::FETCH_ASSOC);
-	}
-
-	public function sync_getOne()
-	{
-		$this->_is_executed = true;
-		$statement = BaseDB::getInstance()->query($this->sql());
-		if( empty($statement) ) {
-			return null;
-		}
-		return $statement->fetch(\PDO::FETCH_ASSOC);
-	}
-
-	public function execute($key = "") {
-		$this->_is_executed = true;
-		$statement = BaseDB::getInstance()->query($this->sql());
-		if( empty($statement) ) {
-			return null;
-		}
-		$last_id = BaseDB::getInstance()->last_id($key);
-		$row_count = $statement->rowCount();
-
-		return [
-			'last_id' 	=> $last_id,
-			'row_count' => $row_count
-		];
 	}
 }
 ?>
