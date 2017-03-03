@@ -9,6 +9,7 @@
 namespace base\framework\client;
 
 use base\common\Error;
+use base\common\Globals;
 use base\concurrent\Promise;
 
 /**
@@ -50,15 +51,20 @@ class Http
      * @var string 错误信息
      */
     public $error;
-    
+
     /**
      * Http constructor.
-     * @param string    $domain     域名(不带http前缀)或者IP
-     * @param bool      $is_ssl     是否开启SSL (https)
-     * @param int       $port       端口号,默认80, https默认为443
+     * @param string $domain 域名(不带http前缀)或者IP
+     * @param bool $is_ssl 是否开启SSL (https)
+     * @param int $port 端口号,默认80, https默认为443
+     * @throws \Exception
      */
     public function __construct($domain, $is_ssl = false, $port = 80)
     {
+        if(!Globals::isWorker())
+        {
+            throw new \Exception("Use CURL in Task Worker!");
+        }
         $this->domain = $domain;
         $this->is_ssl = $is_ssl;
 

@@ -16,7 +16,7 @@ class Task
 
     public function __construct($data)
     {
-        $this->_params = json_decode($data, true);
+        $this->_params = swoole_unpack($data);
 
         $this->_task = $this->_params['task'];
         $this->_method = $this->_params['method'];

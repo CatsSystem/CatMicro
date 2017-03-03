@@ -8,17 +8,12 @@
 
 namespace base\framework\pool\adapter;
 
+use base\concurrent\Promise;
 use base\framework\pool\BasePool;
 use base\framework\client\MySQL as Driver;
-use base\framework\pool\WaitTask;
 
 class Mysql extends BasePool
 {
-    /**
-     * @var \SplQueue 等待队列
-     */
-    private $waiting_tasks;
-
     private $config;
 
     public function __construct($config)
@@ -27,8 +22,6 @@ class Mysql extends BasePool
         $this->config['name'] = $this->config['name'] ?? __FILE__;
         $this->config['size'] = $this->config['size'] ?? 5;
         parent::__construct($config['name'], $this->config['size']);
-
-        $this->waiting_tasks = new \SplQueue();
     }
 
     public function init()
@@ -47,7 +40,9 @@ class Mysql extends BasePool
     {
         if( $this->idle_queue->isEmpty() )
         {
-            return null;
+            $promise = new Promise();
+            $this->waiting_tasks->enqueue($promise);
+            return $promise;
         }
         return $this->idle_queue->dequeue();
     }
@@ -69,20 +64,10 @@ class Mysql extends BasePool
         return;
     }
 
-
-    /**
-     * 添加一个任务到等待队列中
-     * @param WaitTask $task
-     * @return mixed
-     */
-    public function wait(WaitTask $task)
-    {
-        $this->waiting_tasks->enqueue($task);
-    }
-
     protected function new_item($id)
     {
         $driver = new Driver($this->config['args']);
+        $driver->addPool($this);
         $driver->connect($id)->then(function() use ($driver){
             $this->idle_queue->enqueue($driver);
             if( $this->waiting_tasks->count() > 0 )
@@ -96,7 +81,9 @@ class Mysql extends BasePool
 
     protected function doTask()
     {
-        $task = $this->waiting_tasks->dequeue();
+        $promise = $this->waiting_tasks->dequeue();
+        $driver = $this->idle_queue->dequeue();
+        $promise->resolve($driver);
     }
 
 }

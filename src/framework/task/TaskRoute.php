@@ -25,11 +25,11 @@ class TaskRoute
                 if (!method_exists($class, $method)) {
                     throw new \Exception("method error");
                 }
-                $result = $class->$method($task->getParams());
+                $result = call_user_func_array([$class,$method], $task->getParams());
                 return json_encode($result, JSON_UNESCAPED_UNICODE);
             }
         }catch (\Exception $e) {
-            $result =  \call_user_func('base\Enterance::exceptionHandler', $e);
+            $result = var_export($e);
             if( !Config::get('debug', false) )
             {
                 $result = "Error in Server";

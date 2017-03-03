@@ -15,9 +15,13 @@ use base\framework\pool\BasePool;
 
 class MySQL
 {
-    private $config;
-
     public $id;
+
+    /**
+     * 配置选项
+     * @var array
+     */
+    private $config;
 
     /**
      * @var \swoole_mysql
@@ -46,7 +50,7 @@ class MySQL
 
         $this->db = new \swoole_mysql();
         $this->db->on('Close', function($db){
-
+            $this->close();
         });
         $timeId = swoole_timer_after($timeout, function() use ($promise){
             $this->close();
@@ -68,14 +72,50 @@ class MySQL
     {
         $this->db->close();
         unset($this->db);
+        $this->inPool(true);
+    }
+
+    private function inPool($close = false)
+    {
         if( !empty($this->pool) )
         {
-            $this->pool->push($this, true);
+            $this->pool->push($this, $close);
         }
     }
 
-    public function query()
+    public function execute($sql, $timeout)
     {
+        $promise = new Promise();
 
+        $timeId = swoole_timer_after($timeout, function() use ($promise, $sql){
+            $this->inPool();
+            $promise->resolve([
+                'code' => Error::ERR_MYSQL_TIMEOUT,
+            ]);
+        });
+        $this->db->query($sql, function($db, $result) use ($sql, $promise, $timeId){
+            $this->inPool();
+            swoole_timer_clear($timeId);
+            if($result === false) {
+                Log::ERROR('MySQL', sprintf("%s \n [%d] %s",$sql, $db->errno, $db->error));
+                $promise->resolve([
+                    'code'  => Error::ERR_MYSQL_QUERY_FAILED,
+                    'errno' => $db->errno,
+                    'msg'   => sprintf("%s \n [%d] %s",$sql, $db->errno, $db->error)
+                ]);
+            } else if($result === true) {
+                $promise->resolve([
+                    'code'          => Error::SUCCESS,
+                    'affected_rows' => $db->affected_rows,
+                    'insert_id'     => $db->insert_id
+                ]);
+            } else {
+                $promise->resolve([
+                    'code'  => Error::SUCCESS,
+                    'data'  => empty($result) ? [] : $result
+                ]);
+            }
+        });
+        return $promise;
     }
 }

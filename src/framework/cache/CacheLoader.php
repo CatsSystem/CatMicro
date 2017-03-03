@@ -8,7 +8,7 @@
 namespace base\framework\cache;
 
 use base\common\Error;
-use base\Enterance;
+use base\Entrance;
 use base\concurrent\Promise;
 
 class CacheLoader
@@ -38,7 +38,7 @@ class CacheLoader
 
     public function init()
     {
-        $cache_file_path = Enterance::$rootPath . '/app/cache';
+        $cache_file_path = Entrance::$rootPath . '/app/cache';
         if( !file_exists($cache_file_path) )
         {
             return;

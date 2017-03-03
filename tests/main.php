@@ -6,10 +6,10 @@
  * Time: 下午8:44
  */
 
-use base\Enterance;
+use base\Entrance;
 
 require "../vendor/autoload.php";
 require "vendor/autoload.php";
 
 global $debug;
-Enterance::run(__DIR__, $debug);
+Entrance::run(__DIR__, $debug);

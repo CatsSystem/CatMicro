@@ -16,6 +16,11 @@ abstract class BasePool
     protected $idle_queue;
 
     /**
+     * @var \SplQueue 等待队列
+     */
+    protected $waiting_tasks;
+
+    /**
      * @var int 池大小
      */
     protected $size;
@@ -30,6 +35,7 @@ abstract class BasePool
         $this->name         = $name;
         $this->size         = $size;
         $this->idle_queue   = new \SplQueue();
+        $this->waiting_tasks = new \SplQueue();
     }
 
     /**
@@ -45,13 +51,6 @@ abstract class BasePool
      * @return mixed
      */
     abstract public function push(mixed $item, $close = false);
-
-    /**
-     * 添加一个任务到等待队列中
-     * @param WaitTask $task
-     * @return mixed
-     */
-    abstract public function wait(WaitTask $task);
 
     /**
      * 初始化连接池

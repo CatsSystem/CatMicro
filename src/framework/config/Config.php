@@ -8,7 +8,7 @@
 
 namespace base\framework\config;
 
-use base\Enterance;
+use base\Entrance;
 
 class Config
 {
@@ -18,7 +18,7 @@ class Config
     public static function load($configPath = "")
     {
         if( empty($configPath) ) {
-            $configPath = Enterance::$configPath;
+            $configPath = Entrance::$configPath;
         }
         $files = Config::tree($configPath, "/.php$/");
         $config = array();

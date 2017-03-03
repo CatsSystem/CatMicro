@@ -6,7 +6,7 @@ use base\common\Formater;
 use base\server\MainServer;
 use base\framework\config\Config;
 
-class Enterance
+class Entrance
 {
     public static $rootPath;
     public static $configPath;
