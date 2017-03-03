@@ -5,9 +5,10 @@ namespace app\service;
 use app\processor\HproseServiceIf;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
-use base\async\http\AsyncHttpClient;
 use base\concurrent\Promise;
+use base\framework\client\Http;
 use base\framework\log\Log;
+use base\framework\pool\PoolManager;
 use base\model\MySQLStatement;
 
 /**
@@ -26,16 +27,17 @@ class HproseService implements HproseServiceIf
     public function test1(TestRequest $request)
     {
         $response = new TestResponse();
+        $mysql_pool = PoolManager::getInstance()->get('mysql_master');
         try{
             Log::DEBUG("Test", $request);
-            $http = new AsyncHttpClient("www.baidu.com");
+            $http = new Http("www.baidu.com");
             yield $http->init();
 
             $http_result = $http->get('/');
             $sql_result = MySQLStatement::prepare()
                 ->select("Test",  "*")
                 ->limit(0,5)
-                ->query();
+                ->query($mysql_pool->pop());
 
             $result = yield Promise::all([
                 'http'  => $http_result,
@@ -45,6 +47,7 @@ class HproseService implements HproseServiceIf
             Log::DEBUG("Test", $result);
             $response->status = 200;
         } catch (\Error $e) {
+            Log::DEBUG("Test", $e);
             $response->status = 503;
         }
         return $response;

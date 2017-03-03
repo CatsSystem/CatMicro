@@ -18,6 +18,7 @@ return [
     /*********************** Pool Config Start ***********************/
 
     'pool'  => [
+        // 同一类型的连接池不限个数
         [
             'type'  => 'mysql',
             'name'  => 'mysql_master',
@@ -33,35 +34,8 @@ return [
         ],
 
         [
-            'type'  => 'mysql',
-            'name'  => 'mysql_slave',
-            'size'  => 5,
-
-            'args'  => [
-                'host'      => '127.0.0.1',
-                'port'      => 3306,
-                'user'      => 'root',
-                'password'  => '123456',
-                'database'  => 'Test'
-            ]
-        ],
-
-        [
             'type'  => 'redis',
             'name'  => 'redis_master',
-            'size'  => 5,
-
-            'args'  => [
-                'host'      => '127.0.0.1',
-                'port'      => 6379,
-                'select'    => 0,
-                'pwd'       => '123456'
-            ]
-        ],
-        [
-            'type'  => 'redis',
-            'name'  => 'redis_slave',
-            'size'  => 5,
 
             'args'  => [
                 'host'      => '127.0.0.1',

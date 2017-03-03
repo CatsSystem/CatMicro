@@ -5,7 +5,7 @@ namespace app\service;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
 use app\processor\ThriftServiceIf;
-use base\async\http\AsyncHttpClient;
+use base\framework\client\Http;
 use base\framework\log\Log;
 use base\model\MySQLStatement;
 
@@ -27,7 +27,7 @@ class ThriftService implements ThriftServiceIf
         $response = new TestResponse();
         try{
             Log::DEBUG("Test", $request);
-            $http = new AsyncHttpClient("www.baidu.com");
+            $http = new Http("www.baidu.com");
             $result = yield $http->init();
             Log::DEBUG("Test", $result);
             $result = yield $http->get('/');
