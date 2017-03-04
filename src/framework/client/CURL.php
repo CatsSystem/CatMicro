@@ -12,8 +12,8 @@ use base\common\Error;
 use base\concurrent\Promise;
 
 /**
- * 异步Http客户端封装
- * Class Http
+ * 同步Http客户端封装
+ * Class CURL
  * @package base\framework\client
  */
 class CURL

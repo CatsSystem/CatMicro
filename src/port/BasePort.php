@@ -38,12 +38,14 @@ abstract class BasePort
     public function init(\swoole_server $server, array $config)
     {
         $this->server = $server;
+        $this->config = $config;
+
         $this->port = $server->listen(
             $config['host'],
             $config['port'],
-            SWOOLE_TCP
+            $this->getType()
         );
-        $this->config = $config;
+
         /**
          * Port Define
          */
@@ -66,13 +68,11 @@ abstract class BasePort
                 break;
             }
             case 'http':
-            case 'https':
             {
                 $this->port->on('Request', array($this, 'onRequest'));
                 break;
             }
             case 'ws':
-            case 'wss':
             {
                 $this->port->on('Request', array($this, 'onRequest'));
                 $this->port->on('Message', array($this, 'onMessage'));
@@ -89,6 +89,28 @@ abstract class BasePort
     public function getServer()
     {
         return $this->server;
+    }
+
+    private function getType()
+    {
+        if( !isset($config['enable_ssl']))
+        {
+            return SWOOLE_TCP;
+        }
+
+        if( $config['enable_ssl'] )
+        {
+            if( !isset($config['protocol']['ssl_cert_file'])
+                || !isset($config['protocol']['ssl_key_file']) )
+            {
+                return SWOOLE_TCP;
+            }
+            else
+            {
+                return SWOOLE_TCP | SWOOLE_SSL;
+            }
+        }
+        return SWOOLE_TCP;
     }
 
     abstract protected function handleSetting();

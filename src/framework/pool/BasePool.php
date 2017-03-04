@@ -46,11 +46,10 @@ abstract class BasePool
 
     /**
      * 归还一个item
-     * @param mixed $item
+     * @param $item
      * @param bool $close   是否关闭
-     * @return mixed
      */
-    abstract public function push(mixed $item, $close = false);
+    abstract public function push($item, $close = false);
 
     /**
      * 初始化连接池

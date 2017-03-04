@@ -10,6 +10,7 @@ namespace base\framework\cache;
 use base\common\Error;
 use base\Entrance;
 use base\concurrent\Promise;
+use base\framework\config\Config;
 
 class CacheLoader
 {
@@ -38,12 +39,13 @@ class CacheLoader
 
     public function init()
     {
-        $cache_file_path = Entrance::$rootPath . '/app/cache';
-        if( !file_exists($cache_file_path) )
+        $cache_file_path = Config::getSubField('component', 'cache', 'cache_path');
+
+        if( !file_exists(Entrance::$rootPath . $cache_file_path) )
         {
             return;
         }
-        $files = new \DirectoryIterator($cache_file_path);
+        $files = new \DirectoryIterator(Entrance::$rootPath . $cache_file_path);
         foreach ($files as $file) {
             $filename = $file->getFilename();
             if ($filename[0] === '.') {
@@ -51,7 +53,7 @@ class CacheLoader
             }
             if (!$file->isDir()) {
                 $loader = substr($filename, 0, strpos($filename, '.'));
-                $class_name = "\\cache\\" . $loader;
+                $class_name = str_replace('/','\\',$cache_file_path) . $loader;
                 $ob = new $class_name();
                 if( ! $ob instanceof ILoader ) {
                     continue;

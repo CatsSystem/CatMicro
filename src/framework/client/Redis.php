@@ -81,8 +81,9 @@ class Redis
         }
     }
 
-    public function connect($timeout = 3000)
+    public function connect($id, $timeout = 3000)
     {
+        $this->id = $id;
         $promise = new Promise();
         switch ($this->mode)
         {
@@ -91,7 +92,7 @@ class Redis
                 $this->db = new \swoole_redis();
 
                 $this->db->on("close", function(){
-                    $this->connect();
+                    $this->connect($this->id);
                 });
                 $timeId = swoole_timer_after($timeout, function() use ($promise){
                     $this->close();

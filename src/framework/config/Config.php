@@ -72,6 +72,15 @@ class Config
         return $result;
     }
 
+    public static function getSubField($key, $filed, $subfield, $default = null, $throw = false)
+    {
+        $result = isset(self::$config[$key][$filed][$subfield]) ? self::$config[$key][$filed][$subfield] : $default;
+        if ($throw && is_null($result)) {
+            throw new \Exception("{key} config empty");
+        }
+        return $result;
+    }
+
     public static function all()
     {
         return self::$config;

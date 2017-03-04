@@ -8,6 +8,7 @@
 
 namespace base\framework\pool\adapter;
 
+use base\common\Constants;
 use base\common\Globals;
 use base\concurrent\Promise;
 use base\framework\pool\BasePool;
@@ -39,7 +40,7 @@ class Mysql extends BasePool
                 $this->new_item($i + 1);
             }
         }
-        $this->sync = new Driver($this->config['args']);
+        $this->sync = new Driver($this->config['args'], Constants::MODE_SYNC);
         $this->sync->connect(0);
     }
 
@@ -65,23 +66,6 @@ class Mysql extends BasePool
         }
     }
 
-    /**
-     * @param mixed $item
-     * @param bool $close
-     * @return void
-     */
-    public function push(mixed $item, $close = false)
-    {
-        if($close)
-        {
-            $this->new_item($item->id);
-            unset($item);
-            return;
-        }
-        $this->idle_queue->enqueue($item);
-        return;
-    }
-
     protected function new_item($id)
     {
         $driver = new Driver($this->config['args']);
@@ -104,4 +88,20 @@ class Mysql extends BasePool
         $promise->resolve($driver);
     }
 
+    /**
+     * 归还一个item
+     * @param $item
+     * @param bool $close 是否关闭
+     */
+    public function push($item, $close = false)
+    {
+        if($close)
+        {
+            $this->new_item($item->id);
+            unset($item);
+            return;
+        }
+        $this->idle_queue->enqueue($item);
+        return;
+    }
 }

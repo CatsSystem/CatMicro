@@ -190,7 +190,7 @@ class MySQL
                         'insert_id'     => $this->link->insert_id
                     ]);
                 } else {
-                    $result_arr = $result->fetch_assoc();
+                    $result_arr = $result->fetch_all(\MYSQLI_ASSOC);
                     $promise->resolve([
                         'code'  => Error::SUCCESS,
                         'data'  => empty($result_arr) ? [] : ($get_one ? $result_arr[0] : $result_arr)

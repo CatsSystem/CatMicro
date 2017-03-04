@@ -36,7 +36,6 @@ class PoolManager
     protected function __construct()
     {
         $config = Config::get('pool');
-
         foreach ($config as $pool)
         {
             $this->config[$pool['name']] = $pool;
@@ -45,15 +44,20 @@ class PoolManager
 
     public function init($name)
     {
-        if( !in_array($name, $this->config) )
+        if( !isset($this->config[$name] ))
         {
-            return;
+            return false;
         }
         if( !isset($this->pools[$name]) )
         {
-            $this->pools[$name] = PoolFactory::getInstance($name);
+            $this->pools[$name] = PoolFactory::getInstance($this->config[$name]);
+            if( empty($this->pools[$name]) )
+            {
+                return false;
+            }
             $this->pools[$name]->init();
         }
+        return true;
     }
 
     public function get($name)

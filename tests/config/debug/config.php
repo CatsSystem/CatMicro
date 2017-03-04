@@ -11,7 +11,7 @@ return array(
         'pid_path'          => __DIR__ . '/../../',
         'project_name'      => 'micro_service',
 
-        'main_callback'     => 'app\\callback\\ServerCallback',
+        'main_callback'     => '\\app\\callback\\ServerCallback',
     ),
 
     'base' => [
@@ -24,10 +24,6 @@ return array(
 
         'package_max_length'    => 524288,
     ],
-
-    'open_hprose'   => true,
-    'open_thrift'   => true,
-    'open_swoole'     => true,
 
     'server' => array(
         'mode' => SWOOLE_PROCESS,

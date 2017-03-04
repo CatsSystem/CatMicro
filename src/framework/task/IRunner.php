@@ -10,5 +10,5 @@ namespace base\framework\task;
 
 abstract class IRunner
 {
-    
+
 }

@@ -35,7 +35,7 @@ class File extends Logger
             return;
         }
         $log_file = $this->file_path . $path . '_' .  date("Y-m-d") . '.log';
-        if( !isset($this->file[$path]) )
+        if( !isset($this->file[$log_file]) )
         {
             $last = $this->file_path . $path . '_' .date("Y-m-d",strtotime("-1 day")) . '.log';
             if(isset($this->file[$last]))
@@ -43,7 +43,7 @@ class File extends Logger
                 fclose($this->file[$last]);
                 unset($this->file[$last]);
             }
-            $this->file[$path] = fopen($log_file,'a');
+            $this->file[$log_file] = fopen($log_file,'a');
         }
         if( is_string($content) )
         {
@@ -51,6 +51,6 @@ class File extends Logger
         } else {
             $str = date('Y-m-d H:i:s') .": " . var_export($content, true);
         }
-        fwrite( $this->file[$path], $str . "\r\n");
+        fwrite( $this->file[$log_file], $str . "\r\n");
     }
 }

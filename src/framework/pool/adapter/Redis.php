@@ -8,6 +8,7 @@
 
 namespace base\framework\pool\adapter;
 
+use base\common\Constants;
 use base\common\Globals;
 use base\concurrent\Promise;
 use base\framework\pool\BasePool;
@@ -39,7 +40,7 @@ class Redis extends BasePool
                 $this->new_item($i + 1);
             }
         }
-        $this->sync = new Driver($this->config['args']);
+        $this->sync = new Driver($this->config['args'], Constants::MODE_SYNC);
         $this->sync->connect(0);
     }
 
@@ -68,11 +69,11 @@ class Redis extends BasePool
     }
 
     /**
-     * @param mixed $item
+     * @param $item
      * @param bool $close
      * @return void
      */
-    public function push(mixed $item, $close = false)
+    public function push($item, $close = false)
     {
         if($close)
         {

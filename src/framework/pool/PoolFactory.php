@@ -10,13 +10,17 @@ namespace base\framework\pool;
 class PoolFactory
 {
     /**
-     * @param string $type
+     * @param $config
      * @return BasePool
      * @throws \Exception
      */
-    public static function getInstance($type='mysql')
+    public static function getInstance($config)
     {
-        $type = ucfirst(strtolower($type));
+        if( empty($config) || !isset($config['type']))
+        {
+            return null;
+        }
+        $type = ucfirst(strtolower($config['type']));
 
         $class_name = __NAMESPACE__ . '\\adapter\\' . $type;
 
@@ -24,6 +28,6 @@ class PoolFactory
         {
             throw new \Exception("no class {$class_name}");
         }
-        return new $class_name();
+        return new $class_name($config);
     }
 }

@@ -6,34 +6,39 @@
  * Time: 17:34
  */
 
-namespace base\async\task;
+namespace base\framework\client;
 
 use base\common\Globals;
 use base\concurrent\Promise;
 
-class Task
+class AsyncTask
 {
-    /**
-     * @param $task     string
-     * @param $method   string
-     * @param $param    mixed
-     * @return Promise
-     * @throws \Exception
-     */
-    public static function task($task, $method, $param)
+    private $name;
+
+    public function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    public function __call($name, $arguments)
     {
         if(!Globals::isWorker())
         {
             throw new \Exception("Can not use task in Task Worker");
         }
         $promise = new Promise();
+        if( !Globals::isOpenTask() )
+        {
+            $promise->resolve(false);
+            return $promise;
+        }
         $data = swoole_pack([
-            'task'  => $task,
-            'method'=> $method,
-            'params'  => $param
+            'task'    => $this->name,
+            'method'  => $name,
+            'params'  => $arguments
         ]);
         Globals::$server->task($data, -1, function(\swoole_server $serv, $task_id, $data) use ($promise) {
-            $promise->resolve($data);
+            $promise->resolve(swoole_unpack($data));
         });
         return $promise;
     }

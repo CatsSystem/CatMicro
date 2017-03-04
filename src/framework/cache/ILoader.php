@@ -20,6 +20,11 @@ abstract class ILoader
 
     protected $count;
 
+    public function __construct()
+    {
+        $this->init();
+    }
+
     public function broadcast($data)
     {
         $worker_num = Globals::$server->setting['worker_num'] - 1;
@@ -44,6 +49,15 @@ abstract class ILoader
         return $this->data;
     }
 
+    /**
+     * 初始化加载器, 定义加载器id 和 tick 数量
+     */
+    abstract public function init();
+
+    /**
+     * 加载缓存内容
+     * @param Promise $promise
+     */
     abstract public function load(Promise $promise);
 
     /**

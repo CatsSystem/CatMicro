@@ -18,7 +18,7 @@ class Log
     {
         if(self::$instance == null )
         {
-            self::$instance = new Log(Config::get('log'));
+            self::$instance = new Log(Config::getField('component', 'log'));
         }
         return self::$instance;
     }

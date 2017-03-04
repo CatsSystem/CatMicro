@@ -34,7 +34,7 @@ class ServerCallback extends BaseCallback
      */
     public function onWorkerStart($server, $workerId)
     {
-        var_dump("init");
+        Globals::$open_task = true;
         PoolManager::getInstance()->init('mysql_master');
         PoolManager::getInstance()->init('redis_master');
     }

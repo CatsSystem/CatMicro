@@ -10,6 +10,7 @@ namespace base\server;
 
 use base\common\Constants;
 use base\common\Globals;
+use base\concurrent\Promise;
 use base\framework\config\Config;
 use base\framework\cache\CacheLoader;
 use base\framework\task\Task;
@@ -83,8 +84,7 @@ abstract class BaseCallback
 
     public function doWorkerStart($server, $workerId)
     {
-        $workNum = Config::getField('server', 'worker_num');
-        var_dump($workNum);
+        $workNum = Config::getField('base', 'worker_num');
         if ($workerId >= $workNum) {
             Globals::setProcessName($this->project_name . " server tasker  num: ".($server->worker_id - $workNum)." pid " . $server->worker_pid);
         } else {
@@ -110,9 +110,10 @@ abstract class BaseCallback
 
     public function onTask(\swoole_server $server, $task_id, $from_id, $data)
     {
-        $task = new Task($data);
-        $result = TaskRoute::route($task);
-        return $result;
+        Promise::co(function () use ($server, $data) {
+            $result = TaskRoute::route($data);
+            $server->finish($result);
+        });
     }
 
     public function onFinish(\swoole_server $serv, $task_id, $data)
@@ -154,20 +155,24 @@ abstract class BaseCallback
      */
     protected function open_cache_process($init_callback)
     {
-        $process = new \swoole_process(function(\swoole_process $worker) use ($init_callback) {
-           // $worker->name(Config::get('project_name') . " cache process");
-            Globals::setProcessName(Config::get('project_name') . " cache process");
-            CacheLoader::getInstance()->init();
-            if( is_callable($init_callback) )
-            {
-                call_user_func($init_callback);
-            }
-            CacheLoader::getInstance()->load(true);
-            swoole_timer_tick(Constants::ONE_TICK, function(){
-                CacheLoader::getInstance()->load();
-            });
-        }, false, false);
-        $this->server->addProcess($process);
+        Globals::$open_cache = true;
+        if( Globals::isOpenCache() )
+        {
+            $process = new \swoole_process(function(\swoole_process $worker) use ($init_callback) {
+                // $worker->name(Config::get('project_name') . " cache process");
+                Globals::setProcessName(Config::get('project_name') . " cache process");
+                CacheLoader::getInstance()->init();
+                if( is_callable($init_callback) )
+                {
+                    call_user_func($init_callback);
+                }
+                CacheLoader::getInstance()->load(true);
+                swoole_timer_tick(Constants::ONE_TICK, function(){
+                    CacheLoader::getInstance()->load();
+                });
+            }, false, false);
+            $this->server->addProcess($process);
+        }
     }
 
     /**
