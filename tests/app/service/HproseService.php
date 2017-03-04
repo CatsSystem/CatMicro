@@ -6,12 +6,10 @@ use app\processor\HproseServiceIf;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
 use base\common\Globals;
-use base\concurrent\Promise;
 use base\framework\client\AsyncTask;
 use base\framework\client\Http;
 use base\framework\log\Log;
 use base\framework\pool\PoolManager;
-use base\framework\client\Task;
 use base\model\MySQLStatement;
 
 /**
