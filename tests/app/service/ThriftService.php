@@ -5,8 +5,11 @@ namespace app\service;
 use app\processor\TestRequest;
 use app\processor\TestResponse;
 use app\processor\ThriftServiceIf;
+use base\common\Globals;
+use base\framework\client\AsyncTask;
 use base\framework\client\Http;
 use base\framework\log\Log;
+use base\framework\pool\PoolManager;
 use base\model\MySQLStatement;
 
 /**
@@ -25,21 +28,35 @@ class ThriftService implements ThriftServiceIf
     public function test1(TestRequest $request)
     {
         $response = new TestResponse();
-        try{
-            Log::DEBUG("Test", $request);
-            $http = new Http("www.baidu.com");
-            $result = yield $http->init();
-            Log::DEBUG("Test", $result);
-            $result = yield $http->get('/');
-            Log::DEBUG("Test", $result);
+        $mysql_pool = PoolManager::getInstance()->get('mysql_master');
+        $redis_pool = PoolManager::getInstance()->get('redis_master');
 
-            $result = yield MySQLStatement::prepare()
+        try{
+            // 协程Redis
+            $redis_result = yield $redis_pool->pop()->get('cache');
+            Globals::var_dump($redis_result);
+
+            // 协程MySQL
+            $sql_result = yield MySQLStatement::prepare()
                 ->select("Test",  "*")
-                ->limit(0,5)
-                ->query();
-            Log::DEBUG("Test", $result);
+                ->limit(0,2)
+                ->query($mysql_pool->pop());
+            Globals::var_dump($sql_result);
+
+            // 协程Async Task
+            $result = yield (new AsyncTask('TestTask'))
+                ->test_task(1, "test", [1, 2, 3 ]);
+            Globals::var_dump($result);
+
+            // 协程Http
+            $http = new Http("www.baidu.com");
+            yield $http->init();
+            $result = yield $http->get('/');
+            Globals::var_dump($result);
+
             $response->status = 200;
         } catch (\Error $e) {
+            Log::DEBUG("Test", $e);
             $response->status = 503;
         }
         return $response;

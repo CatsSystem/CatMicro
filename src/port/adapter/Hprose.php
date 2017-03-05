@@ -11,9 +11,26 @@ use base\port\BasePort;
 use Hprose\Swoole\Http\Service as HttpService;
 use Hprose\Swoole\Socket\Service as SocketService;
 use Hprose\Swoole\WebSocket\Service as WSService;
+use ReflectionMethod;
 
 class Hprose extends BasePort
 {
+    private static $magicMethods = array(
+        "__construct",
+        "__destruct",
+        "__call",
+        "__callStatic",
+        "__get",
+        "__set",
+        "__isset",
+        "__unset",
+        "__sleep",
+        "__wakeup",
+        "__toString",
+        "__invoke",
+        "__set_state",
+        "__clone"
+    );
 
     protected $service;
 
@@ -51,9 +68,26 @@ class Hprose extends BasePort
             }
         }
         $handler_class = $this->config['service_path'];
-        $handler = new $handler_class();
+        $handler = new HproseWrapper($handler_class);
         $this->service->errorTypes = E_ALL;
-        $this->service->add($handler);
+        $result = get_class_methods($handler_class);
+        if (($parentClass = get_parent_class($handler_class)) !== false) {
+            $inherit = get_class_methods($parentClass);
+            $result = array_diff($result, $inherit);
+        }
+        $methods = array_diff($result, self::$magicMethods);
+        $instanceMethods = array();
+        foreach ($methods as $name) {
+            $method = new ReflectionMethod($handler_class, $name);
+            if ($method->isPublic() &&
+                !$method->isStatic() &&
+                !$method->isConstructor() &&
+                !$method->isDestructor() &&
+                !$method->isAbstract()) {
+                $instanceMethods[] = $name;
+            }
+        }
+        $this->service->addMethods($instanceMethods, $handler);
     }
 
     protected function handleProcess($data)
@@ -93,5 +127,21 @@ class Hprose extends BasePort
     public function onMessage(\swoole_websocket_server $server, \swoole_websocket_frame $frame)
     {
         // TODO: Implement onMessage() method.
+    }
+}
+
+class HproseWrapper
+{
+    private $service;
+
+    public function __construct($service)
+    {
+        $this->service = $service;
+    }
+
+    public function __call($name, $arguments)
+    {
+        $handler = new $this->service();
+        return call_user_func_array([$handler, $name], $arguments);
     }
 }
