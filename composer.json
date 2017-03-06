@@ -13,12 +13,6 @@
         "hprose/hprose-swoole": "dev-master",
         "cat-system/thrift-php": "dev-master"
     },
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://packagist.org"
-        }
-    },
     "autoload": {
         "psr-4": {
             "base\\":"src/"

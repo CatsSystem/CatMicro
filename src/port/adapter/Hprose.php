@@ -8,30 +8,20 @@
 namespace base\port\adapter;
 
 use base\port\BasePort;
+use Closure;
+use Hprose\BytesIO;
+use Hprose\Filter;
+use Hprose\Reader;
 use Hprose\Swoole\Http\Service as HttpService;
 use Hprose\Swoole\Socket\Service as SocketService;
 use Hprose\Swoole\WebSocket\Service as WSService;
+use Hprose\Tags;
+use Hprose\Writer;
 use ReflectionMethod;
+use stdClass;
 
 class Hprose extends BasePort
 {
-    private static $magicMethods = array(
-        "__construct",
-        "__destruct",
-        "__call",
-        "__callStatic",
-        "__get",
-        "__set",
-        "__isset",
-        "__unset",
-        "__sleep",
-        "__wakeup",
-        "__toString",
-        "__invoke",
-        "__set_state",
-        "__clone"
-    );
-
     protected $service;
 
     protected function handleSetting()
@@ -70,24 +60,7 @@ class Hprose extends BasePort
         $handler_class = $this->config['service_path'];
         $handler = new HproseWrapper($handler_class);
         $this->service->errorTypes = E_ALL;
-        $result = get_class_methods($handler_class);
-        if (($parentClass = get_parent_class($handler_class)) !== false) {
-            $inherit = get_class_methods($parentClass);
-            $result = array_diff($result, $inherit);
-        }
-        $methods = array_diff($result, self::$magicMethods);
-        $instanceMethods = array();
-        foreach ($methods as $name) {
-            $method = new ReflectionMethod($handler_class, $name);
-            if ($method->isPublic() &&
-                !$method->isStatic() &&
-                !$method->isConstructor() &&
-                !$method->isDestructor() &&
-                !$method->isAbstract()) {
-                $instanceMethods[] = $name;
-            }
-        }
-        $this->service->addMethods($instanceMethods, $handler);
+        $this->service->addMethods($handler->getInstanceMethods(), $handler);
     }
 
     protected function handleProcess($data)
@@ -132,16 +105,63 @@ class Hprose extends BasePort
 
 class HproseWrapper
 {
+    private static $magicMethods = array(
+        "__construct",
+        "__destruct",
+        "__call",
+        "__callStatic",
+        "__get",
+        "__set",
+        "__isset",
+        "__unset",
+        "__sleep",
+        "__wakeup",
+        "__toString",
+        "__invoke",
+        "__set_state",
+        "__clone"
+    );
+
     private $service;
+    private $instanceMethods = [];
 
     public function __construct($service)
     {
         $this->service = $service;
+        $this->parseMethods();
     }
 
     public function __call($name, $arguments)
     {
         $handler = new $this->service();
         return call_user_func_array([$handler, $name], $arguments);
+    }
+
+    private function parseMethods()
+    {
+        $result = get_class_methods($this->service);
+        if (($parentClass = get_parent_class($this->service)) !== false) {
+            $inherit = get_class_methods($parentClass);
+            $result = array_diff($result, $inherit);
+        }
+        $methods = array_diff($result, self::$magicMethods);
+        foreach ($methods as $name) {
+            $method = new ReflectionMethod($this->service, $name);
+            if ($method->isPublic() &&
+                !$method->isStatic() &&
+                !$method->isConstructor() &&
+                !$method->isDestructor() &&
+                !$method->isAbstract()) {
+                $this->instanceMethods[] = $name;
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getInstanceMethods()
+    {
+        return $this->instanceMethods;
     }
 }
