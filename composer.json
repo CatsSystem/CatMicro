@@ -7,6 +7,7 @@
             "email": "lancelot2014@foxmail.com"
         }
     ],
+    "minimum-stability": "dev",
     "require": {
         "php": ">=7",
         "hprose/hprose-swoole": "dev-master",
