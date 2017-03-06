@@ -11,7 +11,7 @@
     "require": {
         "php": ">=7",
         "hprose/hprose-swoole": "dev-master",
-        "cat-system/thrift-php": "dev-master"
+        "cat-sys/thrift-php": "dev-master"
     },
     "autoload": {
         "psr-4": {
