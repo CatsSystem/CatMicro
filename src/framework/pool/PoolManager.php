@@ -36,9 +36,10 @@ class PoolManager
     protected function __construct()
     {
         $config = Config::get('pool');
-        foreach ($config as $pool)
+        foreach ($config as $name => $pool)
         {
-            $this->config[$pool['name']] = $pool;
+            $pool['name'] = $name;
+            $this->config[$name] = $pool;
         }
     }
 

@@ -43,7 +43,7 @@ class MainServer
 
     public function init(array $config)
     {
-        $this->_server = new \swoole_websocket_server($config['host'], $config['port'], $config['mode']);
+        $this->_server = new \swoole_websocket_server($config['host'], $config['port']);
         $this->config = Config::get('base');
         $this->_server->set($this->config);
         $this->config = array_merge($this->config, $config);
