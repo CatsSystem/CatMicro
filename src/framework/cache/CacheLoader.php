@@ -75,7 +75,10 @@ class CacheLoader
                         $loader->broadcast($value['data']);
                     }
                 });
-                $loader->load($promise);
+                Promise::co(function() use ($loader, &$promise){
+                    $loader->load($promise);
+                });
+
             }
         }
     }
