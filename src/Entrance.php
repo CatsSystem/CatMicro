@@ -2,9 +2,9 @@
 
 namespace base;
 
-use base\common\Formater;
+use core\common\Formater;
 use base\server\MainServer;
-use base\framework\config\Config;
+use core\framework\config\Config;
 
 class Entrance
 {

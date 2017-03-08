@@ -8,7 +8,8 @@
 
 namespace base\server;
 
-use base\framework\config\Config;
+
+use core\framework\config\Config;
 
 class MainServer
 {  

@@ -8,13 +8,11 @@
 
 namespace base\server;
 
-use base\common\Constants;
-use base\common\Globals;
-use base\concurrent\Promise;
-use base\framework\config\Config;
-use base\framework\cache\CacheLoader;
-use base\framework\task\TaskRoute;
+use core\common\Globals;
+use core\framework\cache\CacheLoader;
+use core\framework\config\Config;
 use base\port\PortFactory;
+use core\framework\task\TaskRoute;
 
 abstract class BaseCallback
 {
@@ -109,25 +107,18 @@ abstract class BaseCallback
 
     public function onTask(\swoole_server $server, $task_id, $from_id, $data)
     {
-        Promise::co(function () use ($server, $data) {
-            $result = TaskRoute::route($data);
-            $server->finish($result);
-        });
+        $task_config = Config::getField('component', 'task');
+        TaskRoute::onTask($task_config['task_path'], $data);
     }
 
     public function onFinish(\swoole_server $serv, $task_id, $data)
     {
-        // DO NOTHING
+        TaskRoute::onFinish();
     }
 
     public function onPipeMessage(\swoole_server $server, $from_worker_id, $message)
     {
-        $data = json_decode($message, true);
-        if( $data['type'] == 'cache' )
-        {
-            CacheLoader::getInstance()->set($data['id'], $data['data']);
-        }
-        return;
+        CacheLoader::onPipeMessage($message);
     }
 
     public function _before_start()
@@ -154,24 +145,12 @@ abstract class BaseCallback
      */
     protected function open_cache_process($init_callback)
     {
-        Globals::$open_cache = true;
-        if( Globals::isOpenCache() )
+        $process = CacheLoader::open_cache_process($init_callback);
+        if( empty($process) )
         {
-            $process = new \swoole_process(function(\swoole_process $worker) use ($init_callback) {
-                // $worker->name(Config::get('project_name') . " cache process");
-                Globals::setProcessName(Config::get('project_name') . " cache process");
-                CacheLoader::getInstance()->init();
-                if( is_callable($init_callback) )
-                {
-                    call_user_func($init_callback);
-                }
-                CacheLoader::getInstance()->load(true);
-                swoole_timer_tick(Constants::ONE_TICK, function(){
-                    CacheLoader::getInstance()->load();
-                });
-            }, false, false);
-            $this->server->addProcess($process);
+            return;
         }
+        $this->server->addProcess($process);
     }
 
     /**

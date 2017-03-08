@@ -8,17 +8,10 @@
 namespace base\port\adapter;
 
 use base\port\BasePort;
-use Closure;
-use Hprose\BytesIO;
-use Hprose\Filter;
-use Hprose\Reader;
 use Hprose\Swoole\Http\Service as HttpService;
 use Hprose\Swoole\Socket\Service as SocketService;
 use Hprose\Swoole\WebSocket\Service as WSService;
-use Hprose\Tags;
-use Hprose\Writer;
 use ReflectionMethod;
-use stdClass;
 
 class Hprose extends BasePort
 {
