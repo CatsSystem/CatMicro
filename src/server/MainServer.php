@@ -9,7 +9,7 @@
 namespace base\server;
 
 
-use core\framework\config\Config;
+use core\component\config\Config;
 
 class MainServer
 {  

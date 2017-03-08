@@ -9,10 +9,10 @@
 namespace base\server;
 
 use core\common\Globals;
-use core\framework\cache\CacheLoader;
-use core\framework\config\Config;
+use core\component\cache\CacheLoader;
+use core\component\config\Config;
 use base\port\PortFactory;
-use core\framework\task\TaskRoute;
+use core\component\task\TaskRoute;
 
 abstract class BaseCallback
 {

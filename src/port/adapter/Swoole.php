@@ -11,7 +11,7 @@ namespace base\port\adapter;
 use core\common\Error;
 use core\common\Formater;
 use core\concurrent\Promise;
-use core\framework\log\Log;
+use core\component\log\Log;
 use base\port\BasePort;
 
 class Swoole extends BasePort

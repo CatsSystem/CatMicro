@@ -4,7 +4,7 @@ namespace base;
 
 use core\common\Formater;
 use base\server\MainServer;
-use core\framework\config\Config;
+use core\component\config\Config;
 
 class Entrance
 {
