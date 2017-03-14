@@ -27,6 +27,6 @@ class TCP extends Protocol
 
     public function write($data)
     {
-        $this->server->send($this->fd, $data);
+        $this->server->send($this->fd, pack('N', strlen($data)) . $data);
     }
 }
