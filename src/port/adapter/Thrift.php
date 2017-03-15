@@ -188,9 +188,7 @@ class ThriftTransport extends TThrift\Transport\TFramedTransport
 
     public function flush()
     {
-        $out = pack('N', strlen($this->wBuf_));
-        $out .= $this->wBuf_;
-        $this->writer->write($out);
+        $this->writer->write($this->wBuf_);
         $this->wBuf_ = '';
     }
 }
