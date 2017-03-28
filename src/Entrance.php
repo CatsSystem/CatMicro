@@ -30,10 +30,6 @@ class Entrance
             throw new \Exception("no swoole extension. get: https://github.com/swoole/swoole-src");
         }
 
-        if(!\extension_loaded('swoole_serialize')) {
-            throw new \Exception("no swoole_serialize extension. get: https://github.com/swoole/swoole_serialize");
-        }
-
         if( Config::get('open_hprose', false) && !\extension_loaded('hprose')) {
             throw new \Exception("no open_hprose extension. get: https://github.com/hprose/hprose-pecl");
         }
