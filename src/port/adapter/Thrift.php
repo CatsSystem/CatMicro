@@ -49,10 +49,7 @@ class Thrift extends BasePort
             $socket->writer = $this->protocol;
             $socket->buffer = $data;
 
-            function_exists('thrift_protocol_write_binary')
-                ? $protocol = new TBinaryProtocolAccelerated($socket, true, true)
-                : $protocol = new TBinaryProtocol($socket, true, true);
-
+            $protocol = new TBinaryProtocol($socket, true, true);
             try {
                 $processor_path = $this->config['processor_path'];
                 $handler_class = $this->config['service_path'];

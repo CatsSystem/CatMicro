@@ -94,7 +94,7 @@ class MainServer
             }
         }
         
-        $this->_callback->_before_start();
+        $this->_callback->_beforeStart();
         $this->_server->start();
     }
 

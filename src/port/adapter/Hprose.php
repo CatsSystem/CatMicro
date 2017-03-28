@@ -71,7 +71,6 @@ class Hprose extends BasePort
     public function onReceive(\swoole_server $server, $fd, $from_id, $data)
     {
         // TODO: Implement onReceive() method.
-        var_dump($data);
     }
     
 
