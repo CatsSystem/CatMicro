@@ -93,15 +93,15 @@ abstract class BasePort
 
     private function getType()
     {
-        if( !isset($config['enable_ssl']))
+        if( !isset($this->config['enable_ssl']))
         {
             return SWOOLE_TCP;
         }
 
-        if( $config['enable_ssl'] )
+        if( $this->config['enable_ssl'] )
         {
-            if( !isset($config['protocol']['ssl_cert_file'])
-                || !isset($config['protocol']['ssl_key_file']) )
+            if( !isset($this->config['protocol']['ssl_cert_file'])
+                || !isset($this->config['protocol']['ssl_key_file']) )
             {
                 return SWOOLE_TCP;
             }
